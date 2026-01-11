@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+set -eu
+
+echo "🔍  Running pre-commit checks…"
+
+# 1. Vulnerability scan (high+ severity, prod deps only)
+echo "🔐  pnpm audit (high+)…"
+# Use --audit-level=high and omit dev deps for speed
+pnpm audit --audit-level=high --silent || {
+  echo "❌  High-severity vulnerabilities detected" >&2; exit 1; }
+
+# 2. lint-staged (format + lint only the staged files)
+echo "🎨  lint-staged (format & lint)…"
+# This will run formatter and linter on staged files per package.json config
+npx --no-install lint-staged || { echo "❌  lint-staged failed" >&2; exit 1; }
+
+# 3. Full-project lint (ensure no unchecked errors slip through)
+echo "🧹  ESLint (full project)…"
+pnpm run lint || { echo "❌  ESLint failed" >&2; exit 1; }
+
+# 4. TypeScript type-check (fast, no emit)
+echo "🔡  Type-checking…"
+pnpm run typecheck || { echo "❌  Type-check failed" >&2; exit 1; }
+
+echo "✅  Pre-commit passed!"
