@@ -1,0 +1,72 @@
+{
+  "name": "ralphban",
+  "displayName": "Ralphban - Kanban Board Visualizer",
+  "version": "1.0.0",
+  "description": "An extension that reads task JSON files and visualizes them as an interactive Kanban board with drag-and-drop functionality",
+  "main": "./out/extension.js",
+  "scripts": {
+    "vscode:prepublish": "pnpm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "pnpm run compile && pnpm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "engines": {
+    "vscode": "^1.108.0"
+  },
+  "activationEvents": [
+    "onCommand:ralphban.openKanbanBoard",
+    "onView:kanbanBoard"
+  ],
+  "publisher": "ralphban-publisher",
+  "keywords": [
+    "kanban",
+    "task",
+    "project management",
+    "visualizer"
+  ],
+  "author": "",
+  "license": "ISC",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ralphban.openKanbanBoard",
+        "title": "Open Kanban Board",
+        "category": "Ralphban"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "ralphban.openKanbanBoard",
+          "when": "resourceFilename == 'prd.json'",
+          "group": "navigation"
+        }
+      ]
+    },
+    "icons": {
+      "kanban-icon": {
+        "description": "Kanban Board Icon",
+        "default": {
+          "fontPath": "resources/kanban-icon.woff",
+          "fontCharacter": "\\E001"
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.108.1",
+    "@typescript-eslint/eslint-plugin": "^8.52.0",
+    "@typescript-eslint/parser": "^8.52.0",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.7.1",
+    "eslint": "^9.39.2",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
+    "vscode": "^1.1.37"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1"
+  }
+}
