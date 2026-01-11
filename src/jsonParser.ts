@@ -1,4 +1,6 @@
 import Ajv, { type ValidateFunction } from "ajv";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import * as vscode from "vscode";
 import type { TaskFile } from "./types";
 
@@ -23,16 +25,20 @@ async function loadSchemaValidator(): Promise<ValidateFunction> {
   }
 
   schemaLoadPromise = (async () => {
-    const extensionUri = vscode.extensions.getExtension(
-      "ralphban-publisher.ralphban"
-    )?.extensionUri;
-    if (!extensionUri) {
-      throw new Error("Extension URI not found");
+    let schemaContent: string;
+
+    const extension = vscode.extensions.getExtension("carlosiborra.ralphban");
+    if (extension) {
+      const schemaUri = extension.extensionUri.with({
+        path: `${extension.extensionUri.path}/schemas/task-schema.json`,
+      });
+      const uint8Array = await vscode.workspace.fs.readFile(schemaUri);
+      schemaContent = Buffer.from(uint8Array).toString("utf8");
+    } else {
+      const schemaPath = path.join(__dirname, "..", "schemas", "task-schema.json");
+      schemaContent = fs.readFileSync(schemaPath, "utf8");
     }
 
-    const schemaUri = extensionUri.with({ path: `${extensionUri.path}/schemas/task-schema.json` });
-    const uint8Array = await vscode.workspace.fs.readFile(schemaUri);
-    const schemaContent = Buffer.from(uint8Array).toString("utf8");
     const schema = JSON.parse(schemaContent);
 
     const ajv = new Ajv({ allErrors: true });

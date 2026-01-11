@@ -7,8 +7,8 @@
   "main": "./out/extension.js",
   "scripts": {
     "vscode:prepublish": "pnpm run compile:prod",
-    "compile": "tsc -p ./",
-    "compile:prod": "rimraf out && tsc -p ./ && copyfiles -u 1 \"src/webview/*.{html,css,js}\" out && rimraf out/test",
+    "compile": "tsc -p ./ && copyfiles -u 1 \"src/webview/*.{html,css,js}\" out && copyfiles -u 1 \"schemas/*\" out/schemas && rimraf out/test",
+    "compile:prod": "rimraf out && tsc -p ./ && copyfiles -u 1 \"src/webview/*.{html,css,js}\" out && copyfiles -u 1 \"schemas/*\" out/schemas && rimraf out/test",
     "watch": "tsc -watch -p ./",
     "pretest": "pnpm run compile && pnpm run lint",
     "lint": "eslint .",
