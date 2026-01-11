@@ -1,51 +1,23 @@
-# Pull Request
+# Pull Request for Ralphban
 
-## Description
+Thanks for contributing! This is a personal project, so I appreciate thoughtful changes that keep things simple and focused.
 
-Brief description of the changes. Include the issue number this fixes.
+## What Changed
+
+Brief description of what you changed and why.
 
 **Fixes #** (e.g., Fixes #123)
 
-## Type of Change
+## How to Test
 
-- [ ] Bug fix (non-breaking change that fixes an issue)
-- [ ] New feature (non-breaking change that adds functionality)
-- [ ] Breaking change (fix or feature that causes existing functionality to not work)
-- [ ] Documentation update
-- [ ] Code refactoring (no functional changes)
-- [ ] Other: [describe]
+1. Open the project in VS Code
+2. Press F5 to start Extension Development Host
+3. Test your changes
+4. Run `pnpm run lint && pnpm run typecheck && pnpm run compile`
 
-## Motivation and Context
+## Notes
 
-Why is this change required? What problem does it solve?
-
-## Testing
-
-Describe how you tested the changes:
-
-1. Test case 1
-2. Test case 2
-
-## Checklist
-
-Before submitting, ensure you have:
-
-- [ ] Read the CONTRIBUTING.md guidelines
-- [ ] Performed a self-review of your own code
-- [ ] Commented hard-to-understand areas
-- [ ] Made corresponding documentation changes
-- [ ] No new warnings or errors
-- [ ] Added or updated tests
-- [ ] Existing tests pass locally
-
-### Code Quality
-
-- [ ] Lint passes (`pnpm run lint`)
-- [ ] TypeScript compiles without errors (`pnpm run compile`)
-- [ ] No `console.log()` statements in code
-- [ ] Followed existing code style
-
-## Related Issues
-
-- Closes #
-- Related to #
+- Keep changes minimal and focused
+- Follow existing code style (prettier handles formatting)
+- No new dependencies unless absolutely necessary
+- Focus on simplicity over cleverness
