@@ -83,6 +83,27 @@
         const hasActiveFilters = filters.search || filters.category || filters.priority;
         clearFiltersBtn.style.display = hasActiveFilters ? 'inline-block' : 'none';
 
+        if (hasActiveFilters && filteredTasks.length === 0) {
+            board.classList.add('no-results');
+            if (!document.getElementById('no-results-msg')) {
+                const msg = document.createElement('div');
+                msg.id = 'no-results-msg';
+                msg.className = 'empty-state-message';
+                
+                let filterDesc = '';
+                if (filters.search) filterDesc = ` matching "<strong>${filters.search}</strong>"`;
+                else if (filters.category || filters.priority) filterDesc = ` in the selected ${filters.category && filters.priority ? 'category and priority' : filters.category ? 'category' : 'priority'}`;
+
+                msg.innerHTML = `No tasks ${filterDesc}. <button id="reset-link">Clear filters</button>`;
+                board.prepend(msg);
+                document.getElementById('reset-link').onclick = () => clearFiltersBtn.click();
+            }
+        } else {
+            board.classList.remove('no-results');
+            const msg = document.getElementById('no-results-msg');
+            if (msg) msg.remove();
+        }
+
         const columns = ['pending', 'in_progress', 'completed', 'cancelled'];
 
         columns.forEach(status => {
@@ -92,13 +113,18 @@
             const tasks = filteredTasks.filter(t => (t.status || 'pending') === status);
             tasks.forEach(task => {
                 const card = createTaskCard(task);
-                columnEl.appendChild(card);
+                if (card) columnEl.appendChild(card);
             });
 
             const addTaskBtn = document.createElement('button');
             addTaskBtn.className = 'add-task-btn';
+            addTaskBtn.type = 'button';
             addTaskBtn.textContent = '+ Add Task';
-            addTaskBtn.onclick = () => openTaskForm(null, status);
+            addTaskBtn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openTaskForm(null, status);
+            };
             columnEl.appendChild(addTaskBtn);
         });
 
@@ -194,12 +220,15 @@
     });
 
     function renderStats(tasks) {
-        const total = tasks.length;
+        const total = currentTasks.length;
+        const filtered = tasks.length;
         const completed = tasks.filter(t => (t.status || 'pending') === 'completed').length;
-        const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+        const percent = filtered > 0 ? Math.round((completed / filtered) * 100) : 0;
+
+        const hasActiveFilters = filters.search || filters.category || filters.priority;
 
         statsContainer.innerHTML = `
-            <span>Total: ${total}</span>
+            <span>${hasActiveFilters ? `Showing ${filtered} of ${total} tasks` : `Total Tasks: ${total}`}</span>
             <span>Completed: ${completed} (${percent}%)</span>
         `;
     }
@@ -240,50 +269,70 @@
         document.getElementById('delete-task-btn').addEventListener('click', () => {
             if (confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
                 vscode.postMessage({ type: 'deleteTask', taskId });
-                modal.style.display = 'none';
+                hideModal();
             }
         });
 
+        showModal();
+    }
+
+    function showModal() {
         modal.style.display = 'block';
+        setTimeout(() => modal.classList.add('show'), 10);
+    }
+
+    function hideModal() {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
     }
 
     function openTaskForm(task = null, defaultStatus = 'pending') {
         editingTaskId = task ? (task.id || task.description) : null;
 
-        modalBody.style.display = 'none';
-        taskForm.style.display = 'block';
+        if (modalBody) modalBody.style.display = 'none';
+        if (taskForm) taskForm.style.display = 'block';
 
         if (task) {
             formTitle.textContent = 'Edit Task';
-            taskCategory.value = task.category;
-            taskPriority.value = task.priority || 'low';
-            taskStatus.value = task.status || 'pending';
-            taskDescription.value = task.description;
+            if (taskCategory) taskCategory.value = task.category;
+            if (taskPriority) taskPriority.value = task.priority || 'low';
+            if (taskStatus) taskStatus.value = task.status || 'pending';
+            if (taskDescription) taskDescription.value = task.description;
             stepsContainer.innerHTML = '';
             (task.steps || []).forEach(step => addStepInput(step));
         } else {
             formTitle.textContent = 'New Task';
-            taskCategory.value = 'frontend';
-            taskPriority.value = 'low';
-            taskStatus.value = defaultStatus;
-            taskDescription.value = '';
+            if (taskCategory) taskCategory.value = 'frontend';
+            if (taskPriority) taskPriority.value = 'low';
+            if (taskStatus) taskStatus.value = defaultStatus;
+            if (taskDescription) taskDescription.value = '';
             stepsContainer.innerHTML = '';
             addStepInput();
         }
 
-        modal.style.display = 'block';
+        showModal();
     }
 
     function addStepInput(value = '') {
         const stepDiv = document.createElement('div');
         stepDiv.className = 'step-input';
-        stepDiv.innerHTML = `
-            <input type="text" value="${value}" placeholder="Enter step..." required>
-            <button type="button" class="remove-step-btn">&times;</button>
-        `;
-        stepDiv.querySelector('.remove-step-btn').addEventListener('click', () => {
-            stepDiv.remove();
-        });
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = value;
+        input.placeholder = 'Enter step...';
+        input.required = true;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-step-btn';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.onclick = () => stepDiv.remove();
+
+        stepDiv.appendChild(input);
+        stepDiv.appendChild(removeBtn);
         stepsContainer.appendChild(stepDiv);
     }
 
@@ -311,11 +360,11 @@
     }
 
     closeButton.onclick = () => {
-        modal.style.display = 'none';
+        hideModal();
     };
 
     cancelEditBtn.onclick = () => {
-        modal.style.display = 'none';
+        hideModal();
     };
 
     addStepBtn.onclick = () => {
@@ -342,12 +391,12 @@
             vscode.postMessage({ type: 'createTask', task });
         }
 
-        modal.style.display = 'none';
+        hideModal();
     };
 
     window.onclick = (event) => {
         if (event.target === modal) {
-            modal.style.display = 'none';
+            hideModal();
         }
     };
 }());

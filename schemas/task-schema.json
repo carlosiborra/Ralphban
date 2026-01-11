@@ -4,7 +4,7 @@
   "title": "Task File Schema",
   "description": "Schema for validating task JSON files used by the Kanban board extension",
   "type": "object",
-  "required": ["feature", "description", "tasks"],
+  "required": ["tasks"],
   "properties": {
     "feature": {
       "type": "string",
@@ -26,12 +26,12 @@
   "definitions": {
     "task": {
       "type": "object",
-      "required": ["category", "description", "steps", "dependencies", "status", "passes"],
+      "required": ["category", "description", "steps", "passes"],
       "properties": {
         "category": {
           "type": "string",
           "description": "The category of the task",
-          "enum": ["frontend", "backend", "database", "testing", "documentation", "infrastructure", "security"]
+          "enum": ["frontend", "backend", "database", "testing", "documentation", "infrastructure", "security", "functional"]
         },
         "description": {
           "type": "string",

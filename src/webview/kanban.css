@@ -101,6 +101,39 @@ body {
     overflow-x: auto;
 }
 
+.empty-state-message {
+    width: 100%;
+    text-align: center;
+    padding: 40px;
+    background-color: var(--vscode-editor-background);
+    border: 1px dashed var(--vscode-panel-border);
+    border-radius: var(--border-radius);
+    color: var(--vscode-descriptionForeground);
+    margin-bottom: 20px;
+}
+
+.empty-state-message strong {
+    color: var(--vscode-editor-foreground);
+}
+
+.empty-state-message button {
+    background: none;
+    border: none;
+    color: var(--vscode-textLink-foreground);
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font-size: inherit;
+}
+
+.board.no-results {
+    flex-direction: column;
+}
+
+.board.no-results .column {
+    opacity: 0.3;
+}
+
 .column {
     flex: 0 0 var(--column-width);
     background-color: var(--vscode-sideBar-background);
@@ -124,6 +157,15 @@ body {
     flex-grow: 1;
     overflow-y: auto;
     min-height: 50px;
+    transition: background-color 0.2s ease-out;
+}
+
+.column.drag-over {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.column.drag-over .task-list {
+    background-color: rgba(0,0,0,0.05);
 }
 
 .task-card {
@@ -133,17 +175,21 @@ body {
     padding: var(--card-padding);
     margin-bottom: 12px;
     cursor: grab;
-    transition: background-color 0.2s, border-color 0.2s;
+    transition: all 0.2s ease-out;
+    transform: translateZ(0);
 }
 
 .task-card:hover {
     background-color: var(--vscode-list-hoverBackground);
     border-color: var(--vscode-focusBorder);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .task-card.dragging {
     opacity: 0.5;
     cursor: grabbing;
+    transform: scale(0.98);
 }
 
 .task-header {
@@ -301,17 +347,33 @@ body {
     width: 100%;
     height: 100%;
     background-color: rgba(0,0,0,0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+}
+
+.modal.show {
+    opacity: 1;
 }
 
 .modal-content {
     background-color: var(--vscode-editor-background);
-    margin: 10% auto;
+    margin: 5% auto;
     padding: 20px;
     border: 1px solid var(--vscode-panel-border);
     width: 60%;
     max-width: 600px;
+    max-height: 60vh;
+    overflow-y: auto;
     border-radius: var(--border-radius);
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    opacity: 0;
+}
+
+.modal.show .modal-content {
+    transform: translateY(0);
+    opacity: 1;
 }
 
 .close-button {

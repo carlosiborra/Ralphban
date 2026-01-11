@@ -1,21 +1,21 @@
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 
-export type TaskCategory = 'frontend' | 'backend' | 'database' | 'testing' | 'documentation' | 'infrastructure' | 'security';
+export type TaskCategory = 'frontend' | 'backend' | 'database' | 'testing' | 'documentation' | 'infrastructure' | 'security' | 'functional';
 
 export interface Task {
   id?: string;
   description: string;
-  status: TaskStatus;
+  status?: TaskStatus;
   category: TaskCategory;
   steps: string[];
-  dependencies: string[];
+  dependencies?: string[];
   passes: boolean;
   priority?: string;
 }
 
 export interface TaskFile {
-  feature: string;
-  description: string;
+  feature?: string;
+  description?: string;
   tasks: Task[];
 }
 

@@ -3,7 +3,14 @@ import { Task, TaskFile } from './types';
 
 function getFilePatterns(): string[] {
 	const config = vscode.workspace.getConfiguration('ralphban');
-	return config.get<string[]>('filePatterns', ['**/*.prd.json', '**/prd.json', '**/tasks.json']);
+	return config.get<string[]>('filePatterns', [
+		'**/plans/**/*.json',
+		'**/prd/**/*.json',
+		'./*.json',
+		'**/*.prd.json',
+		'**/tasks.json',
+		'**/*.json'
+	]);
 }
 
 export async function findTaskFiles(): Promise<vscode.Uri[]> {

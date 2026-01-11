@@ -17,7 +17,9 @@
     "vscode": "^1.108.0"
   },
   "activationEvents": [
-    "onCommand:ralphban.openKanbanBoard"
+    "onCommand:ralphban.openKanbanBoard",
+    "onLanguage:json",
+    "onView:kanbanBoard"
   ],
   "publisher": "ralphban-publisher",
   "keywords": [
@@ -29,20 +31,69 @@
   "author": "",
   "license": "ISC",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ralphban-explorer",
+          "title": "Ralphban",
+          "icon": "images/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "ralphban-explorer": [
+        {
+          "id": "kanbanBoard",
+          "name": "Kanban Board",
+          "type": "webview"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "ralphban.openKanbanBoard",
         "title": "Open Kanban Board",
         "category": "Ralphban",
         "icon": "images/icon.png"
+      },
+      {
+        "command": "ralphban.createKanbanBoard",
+        "title": "Create New Kanban Board",
+        "category": "Ralphban",
+        "icon": "$(plus)"
+      },
+      {
+        "command": "ralphban.refreshBoardList",
+        "title": "Refresh Kanban Boards",
+        "category": "Ralphban",
+        "icon": "$(refresh)"
       }
     ],
     "menus": {
+      "view/title": [
+        {
+          "command": "ralphban.refreshBoardList",
+          "when": "view == kanbanBoard",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ralphban.createKanbanBoard",
+          "when": "view == kanbanBoard",
+          "group": "navigation@2"
+        }
+      ],
       "editor/title": [
         {
           "command": "ralphban.openKanbanBoard",
-          "when": "ralphban.isTaskFile",
-          "group": "navigation@0"
+          "when": "resourceExtname == .json && ralphban.isTaskFile",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ralphban.openKanbanBoard",
+          "when": "resourceExtname == .json && ralphban.isTaskFile",
+          "group": "navigation"
         }
       ]
     },

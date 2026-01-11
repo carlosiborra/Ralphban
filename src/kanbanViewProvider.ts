@@ -3,11 +3,14 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { handleWebviewMessage } from './messageHandler';
 import { parseTaskFile } from './jsonParser';
+import { TaskFileWatcher } from './fileWatcher';
+import { findTaskFiles } from './fileScanner';
 
 export class KanbanViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'kanbanBoard';
   private _view?: vscode.WebviewView;
   private _currentFile?: vscode.Uri;
+  private _watcher?: TaskFileWatcher;
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
@@ -30,35 +33,58 @@ export class KanbanViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     webviewView.webview.onDidReceiveMessage(async data => {
-      if (this._currentFile) {
-        await handleWebviewMessage(data, this._currentFile, this._view);
-      } else {
-        // Fallback for simple messages if no file is selected yet
-        switch (data.type) {
-          case 'onInfo':
-            vscode.window.showInformationMessage(data.value || data.data);
-            break;
-          case 'onError':
-            vscode.window.showErrorMessage(data.value || data.data);
-            break;
-        }
+      switch (data.type) {
+        case 'ready':
+          await this.refreshBoardList();
+          break;
+        case 'open':
+          if (data.uri) {
+            vscode.commands.executeCommand('ralphban.openKanbanBoard', vscode.Uri.parse(data.uri));
+          }
+          break;
+        case 'create':
+          vscode.commands.executeCommand('ralphban.createKanbanBoard');
+          break;
+        case 'onInfo':
+          vscode.window.showInformationMessage(data.value || data.data);
+          break;
+        case 'onError':
+          vscode.window.showErrorMessage(data.value || data.data);
+          break;
       }
     });
 
     webviewView.onDidDispose(() => {
       this._view = undefined;
+      this._watcher?.dispose();
+    });
+
+    // Initial scan
+    this.refreshBoardList();
+  }
+
+  public async refreshBoardList() {
+    if (!this._view) {
+      return;
+    }
+
+    const files = await findTaskFiles();
+    const boards = files.map(uri => ({
+      name: path.basename(uri.fsPath),
+      path: vscode.workspace.asRelativePath(uri),
+      uri: uri.toString()
+    }));
+
+    await this._view.webview.postMessage({
+      type: 'list',
+      boards: boards
     });
   }
 
   public async setTaskFile(uri: vscode.Uri) {
-    this._currentFile = uri;
-    if (this._view) {
-      const taskFile = await parseTaskFile(uri);
-      this._view.webview.postMessage({
-        type: 'update',
-        data: taskFile
-      });
-    }
+    // We no longer switch the sidebar to the full board view
+    // Instead we just refresh the list to ensure the current file is there
+    await this.refreshBoardList();
   }
 
   public postMessage(message: any) {
@@ -68,27 +94,13 @@ export class KanbanViewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
-    const scriptUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'src', 'webview', 'kanban.js')));
-    const styleUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'src', 'webview', 'kanban.css')));
-    const htmlPath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'kanban.html');
-
+    const htmlPath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'selector.html');
     let html = fs.readFileSync(htmlPath, 'utf8');
 
     const nonce = getNonce();
 
-    // Replace placeholders in the HTML template
     html = html.replace(/\${webview.cspSource}/g, webview.cspSource);
     html = html.replace(/\${nonce}/g, nonce);
-    html = html.replace(/\${styleUri}/g, styleUri.toString());
-    html = html.replace(/\${scriptUri}/g, scriptUri.toString());
-
-    // Inject the actual URIs into the template if they are not already there
-    if (!html.includes(styleUri.toString())) {
-        html = html.replace('</head>', `    <link href="${styleUri}" rel="stylesheet">\n</head>`);
-    }
-    if (!html.includes(scriptUri.toString())) {
-        html = html.replace('</body>', `    <script nonce="${nonce}" src="${scriptUri}"></script>\n</body>`);
-    }
 
     return html;
   }

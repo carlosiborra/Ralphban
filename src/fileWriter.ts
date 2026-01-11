@@ -37,3 +37,20 @@ export async function writeTaskFile(uri: vscode.Uri, tasks: Task[]): Promise<voi
         throw error;
     }
 }
+
+/**
+ * Creates a new task JSON file with a default template.
+ * 
+ * @param uri The URI where the file should be created.
+ * @param featureName Optional name for the feature.
+ */
+export async function createNewTaskFile(uri: vscode.Uri, featureName?: string): Promise<void> {
+    const defaultData: any = {
+        feature: featureName || "New Feature",
+        description: "Created via Ralphban",
+        tasks: []
+    };
+
+    const content = Buffer.from(JSON.stringify(defaultData, null, 2), 'utf8');
+    await vscode.workspace.fs.writeFile(uri, content);
+}
