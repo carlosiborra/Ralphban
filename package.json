@@ -63,15 +63,6 @@
           "group": "navigation@0"
         }
       ]
-    },
-    "icons": {
-      "kanban-icon": {
-        "description": "Kanban Board Icon",
-        "default": {
-          "fontPath": "resources/kanban-icon.woff",
-          "fontCharacter": "\\E001"
-        }
-      }
     }
   },
   "devDependencies": {
