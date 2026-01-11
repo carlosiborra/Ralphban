@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 
 const SLOW_MODE = process.env.SLOW_TESTS === "true";
-const testWorkspacePath = path.resolve(__dirname, "../../../test-workspace");
+const testWorkspacePath = path.resolve(__dirname, "../../fixtures");
 const testFilePath = path.resolve(testWorkspacePath, "test-prd.json");
 
 function log(msg: string) {

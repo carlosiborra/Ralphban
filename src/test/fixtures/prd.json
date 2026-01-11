@@ -17,7 +17,7 @@
   },
   {
     "description": "Write unit tests",
-    "status": "pending",
+    "status": "in_progress",
     "category": "testing",
     "steps": ["Set up test framework", "Write component tests", "Run coverage report"],
     "dependencies": ["Create Kanban webview UI"],

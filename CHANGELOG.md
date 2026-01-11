@@ -4,9 +4,7 @@ This file documents notable changes to Ralphban.
 
 The format loosely follows Keep a Changelog and versioning follows Semantic Versioning. Entries focus on what actually matters to users and contributors.
 
-## [1.0.0] – 2026-01-11
-
-Initial release.
+## [1.0.0] - 2026.01.11
 
 ### Added
 
@@ -40,6 +38,19 @@ Initial release.
   - No telemetry
   - No hidden state
 
+- Comprehensive test suite with 50+ tests covering core functionality
+- Configurable custom categories for tasks
+
+### Fixed
+
+- Empty filter results now show a clear error message "No tasks found" with a prominent Clear Filters button
+- Header with search, filters, and stats remains visible when no results match
+
+### Refactored
+
+- Modularized kanban webview with utility extraction for improved maintainability
+  - Separated rendering logic, DOM access, state management, and event handling
+
 ---
 
 ## Changelog Conventions
@@ -50,11 +61,3 @@ Initial release.
 - **Deprecated**: features planned for removal
 - **Removed**: features that were removed
 - **Security**: security-related changes
-
----
-
-If you want, I can also:
-
-- add an “Unreleased” section
-- make future entries more concise
-- align it tightly with Conventional Commits output

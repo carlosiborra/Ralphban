@@ -170,34 +170,23 @@ export function renderBoard(data, openTaskForm) {
 
   if (hasActiveFilters && filteredTasks.length === 0) {
     board.classList.add("no-results");
-    if (!document.getElementById("no-results-msg")) {
-      const msg = document.createElement("div");
-      msg.id = "no-results-msg";
-      msg.className = "empty-state-message";
-
-      let filterDesc = "";
-      if (filters.search) {
-        filterDesc = ` matching "<strong>${filters.search}</strong>"`;
-      } else if (filters.category || filters.priority) {
-        const type =
-          filters.category && filters.priority
-            ? "category and priority"
-            : filters.category
-              ? "category"
-              : "priority";
-        filterDesc = ` in the selected ${type}`;
-      }
-
-      msg.innerHTML = `No tasks ${filterDesc}. <button id="reset-link">Clear filters</button>`;
-      board.prepend(msg);
-      document.getElementById("reset-link").onclick = () => {
-        clearFilters();
-        searchInput.value = "";
-        filterCategory.value = "";
-        filterPriority.value = "";
-        renderBoard(currentTasks, openTaskForm);
-      };
-    }
+    board.innerHTML = "";
+    const container = document.createElement("div");
+    container.className = "no-results-container";
+    container.innerHTML = `
+      <div class="no-results-error">No tasks found</div>
+      <button id="reset-link" class="clear-filters-big-btn">Clear Filters</button>
+    `;
+    board.appendChild(container);
+    document.getElementById("reset-link").onclick = () => {
+      clearFilters();
+      searchInput.value = "";
+      filterCategory.value = "";
+      filterPriority.value = "";
+      renderBoard(currentTasks, openTaskForm);
+    };
+    renderStats(filteredTasks);
+    return;
   } else {
     board.classList.remove("no-results");
     const msg = document.getElementById("no-results-msg");

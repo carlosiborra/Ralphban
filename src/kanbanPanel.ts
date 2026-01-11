@@ -153,12 +153,12 @@ export class KanbanPanel {
 
   private getHtmlForWebview(webview: vscode.Webview) {
     const scriptPath = vscode.Uri.file(
-      path.join(this.extensionUri.fsPath, "src", "webview", "kanban.js")
+      path.join(this.extensionUri.fsPath, "out", "webview", "kanban.js")
     );
     const stylePath = vscode.Uri.file(
-      path.join(this.extensionUri.fsPath, "src", "webview", "kanban.css")
+      path.join(this.extensionUri.fsPath, "out", "webview", "kanban.css")
     );
-    const htmlPath = path.join(this.extensionUri.fsPath, "src", "webview", "kanban.html");
+    const htmlPath = path.join(this.extensionUri.fsPath, "out", "webview", "kanban.html");
 
     const scriptUri = webview.asWebviewUri(scriptPath);
     const styleUri = webview.asWebviewUri(stylePath);

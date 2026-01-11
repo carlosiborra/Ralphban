@@ -108,17 +108,28 @@ export async function parse(u: any) {
 
 ```
 src/
-├── extension.ts        Entry point
-├── types.ts            Shared types
-├── messageHandler.ts   Extension-side logic
-├── file*.ts            File IO and discovery
+├── extension.ts          Entry point and activation
+├── types.ts              Shared TypeScript types
+├── messageHandler.ts     Message routing and extension-side logic
+├── fileScanner.ts        Workspace task file discovery
+├── jsonParser.ts         Schema validation with AJV
+├── fileWriter.ts         Atomic file writes
+├── kanbanPanel.ts        Panel management and view provider
+├── kanbanViewProvider.ts Webview construction and messaging
 ├── webview/
-│   ├── kanban.html
-│   ├── kanban.css
-│   └── kanban.js
+│   ├── kanban.html       Main HTML structure
+│   ├── kanban.css        All styling and animations
+│   ├── kanban.js         Webpack entry point
+│   ├── renderer.js       Board rendering logic
+│   ├── dom.js            DOM element exports
+│   ├── events.js         Event listener setup
+│   ├── state.js          State management
+│   ├── task-utils.js     Task utilities and filtering
+│   ├── form.js           Task form handling
+│   └── fileWatcher.ts    (not present in webview)
 ```
 
-Try to keep responsibilities obvious and separated.
+The webview is bundled as a single module. UI logic is split across focused files for maintainability.
 
 ### Naming
 
@@ -148,7 +159,7 @@ Before opening a PR, sanity check:
 
 - Dragging tasks between columns
 - Creating, editing, deleting tasks
-- Search and filters
+- Search and filters (including no-results state with Clear Filters button)
 - Markdown rendering
 - Editing JSON directly and seeing updates
 - Multiple boards in one workspace
@@ -238,43 +249,69 @@ Include:
 ```
 extension.ts
   Commands and activation
-  KanbanPanel and views
+
+kanbanPanel.ts
+  Panel lifecycle and view provider management
+
+kanbanViewProvider.ts
+  Webview HTML construction and message handling
 
 messageHandler.ts
-  Message routing and logic
+  Message routing, task operations, and file I/O
 
 fileScanner.ts
-  Workspace discovery
+  Workspace task file discovery
 
 jsonParser.ts
-  Schema validation
+  Schema validation with AJV
 
 fileWriter.ts
-  Atomic writes
+  Atomic file writes with backup
 ```
 
 ### Webview
 
+The webview is structured as a modular ESM codebase:
+
 ```
 kanban.html
-  Structure
+  Main HTML structure with modal and templates
 
 kanban.css
-  Styling and animations
+  All styling, including no-results state
 
 kanban.js
-  UI logic and messaging
+  Entry point that imports all modules
+
+renderer.js
+  Board and column rendering, task card creation
+
+dom.js
+  DOM element references and exports
+
+events.js
+  Search, filter, and button event listeners
+
+state.js
+  Central state management and filter state
+
+task-utils.js
+  Task filtering, status utilities, and validations
+
+form.js
+  Task form modal handling and validation
 ```
 
 ### Message flow
 
 ```
-Webview
-  → postMessage
-  → Extension host
-  → File update
-  → postMessage back
-  → UI rerender
+Webview (renderer.js)
+  → postMessage (action, data)
+  → Extension host (messageHandler.ts)
+  → File update (fileWriter.ts)
+  → File watcher notification
+  → postMessage back (updated tasks)
+  → Webview rerender
 ```
 
 No hidden state. The file is the source of truth.

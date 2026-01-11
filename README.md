@@ -181,7 +181,7 @@ To compile TypeScript and create a `.vsix` package for distribution:
 pnpm run compile
 
 # Package the extension
-npx vsce package
+pnpm exec vsce package --no-dependencies
 ```
 
 The resulting `ralphban-X.X.X.vsix` file can be installed in VS Code via:

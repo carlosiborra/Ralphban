@@ -6,8 +6,9 @@
   "description": "An extension that reads task JSON files and visualizes them as an interactive Kanban board with drag-and-drop functionality",
   "main": "./out/extension.js",
   "scripts": {
-    "vscode:prepublish": "pnpm run compile",
+    "vscode:prepublish": "pnpm run compile:prod",
     "compile": "tsc -p ./",
+    "compile:prod": "rimraf out && tsc -p ./ && copyfiles -u 1 \"src/webview/*.{html,css,js}\" out && rimraf out/test",
     "watch": "tsc -watch -p ./",
     "pretest": "pnpm run compile && pnpm run lint",
     "lint": "eslint .",
@@ -21,7 +22,7 @@
     "prepare": "husky"
   },
   "engines": {
-    "vscode": "^1.108.0"
+    "vscode": "^1.100.0"
   },
   "activationEvents": [
     "onView:kanbanBoard",
@@ -201,6 +202,7 @@
     "@types/vscode": "^1.100.0",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.7.1",
+    "copyfiles": "^2.4.1",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
@@ -210,6 +212,7 @@
     "lint-staged": "^15.2.2",
     "mocha": "^11.7.5",
     "prettier": "^3.7.4",
+    "rimraf": "^6.1.2",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.52.0"

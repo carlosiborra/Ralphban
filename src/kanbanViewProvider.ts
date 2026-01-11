@@ -89,10 +89,10 @@ export class KanbanViewProvider implements vscode.WebviewViewProvider {
 
   private _getHtmlForWebview(webview: vscode.Webview) {
     const stylePath = vscode.Uri.file(
-      path.join(this._extensionUri.fsPath, "src", "webview", "kanban.css")
+      path.join(this._extensionUri.fsPath, "out", "webview", "kanban.css")
     );
     const styleUri = webview.asWebviewUri(stylePath);
-    const htmlPath = path.join(this._extensionUri.fsPath, "src", "webview", "selector.html");
+    const htmlPath = path.join(this._extensionUri.fsPath, "out", "webview", "selector.html");
     const html = fs.readFileSync(htmlPath, "utf8");
 
     return injectWebviewAssets(html, webview, [styleUri]);
