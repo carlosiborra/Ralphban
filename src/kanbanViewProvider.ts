@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 
 export class KanbanViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'kanbanBoard';
@@ -52,23 +53,27 @@ export class KanbanViewProvider implements vscode.WebviewViewProvider {
   private _getHtmlForWebview(webview: vscode.Webview) {
     const scriptUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'src', 'webview', 'kanban.js')));
     const styleUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'src', 'webview', 'kanban.css')));
+    const htmlPath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'kanban.html');
+
+    let html = fs.readFileSync(htmlPath, 'utf8');
 
     const nonce = getNonce();
 
-    return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<link href="${styleUri}" rel="stylesheet">
-				<title>Kanban Board</title>
-			</head>
-			<body>
-				<div id="board"></div>
-				<script nonce="${nonce}" src="${scriptUri}"></script>
-			</body>
-			</html>`;
+    // Replace placeholders in the HTML template
+    html = html.replace(/\${webview.cspSource}/g, webview.cspSource);
+    html = html.replace(/\${nonce}/g, nonce);
+    html = html.replace(/\${styleUri}/g, styleUri.toString());
+    html = html.replace(/\${scriptUri}/g, scriptUri.toString());
+
+    // Inject the actual URIs into the template if they are not already there
+    if (!html.includes(styleUri.toString())) {
+        html = html.replace('</head>', `    <link href="${styleUri}" rel="stylesheet">\n</head>`);
+    }
+    if (!html.includes(scriptUri.toString())) {
+        html = html.replace('</body>', `    <script nonce="${nonce}" src="${scriptUri}"></script>\n</body>`);
+    }
+
+    return html;
   }
 }
 
