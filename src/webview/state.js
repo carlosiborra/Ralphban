@@ -1,4 +1,14 @@
 let currentTasks = [];
+let categories = [
+  "frontend",
+  "backend",
+  "database",
+  "testing",
+  "documentation",
+  "infrastructure",
+  "security",
+  "functional",
+];
 let editingTaskId = null;
 let filters = {
   search: "",
@@ -12,6 +22,14 @@ export function getCurrentTasks() {
 
 export function setCurrentTasks(tasks) {
   currentTasks = tasks;
+}
+
+export function getCategories() {
+  return categories;
+}
+
+export function setCategories(newCategories) {
+  categories = newCategories;
 }
 
 export function getEditingTaskId() {

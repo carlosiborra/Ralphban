@@ -15,7 +15,14 @@ import {
   vscode,
   modal,
 } from "./dom.js";
-import { setEditingTaskId, getEditingTaskId } from "./state.js";
+import { setEditingTaskId, getEditingTaskId, getCategories } from "./state.js";
+
+function populateCategoryDropdown() {
+  const categories = getCategories();
+  taskCategory.innerHTML = categories
+    .map((cat) => `<option value="${cat}">${cat}</option>`)
+    .join("");
+}
 
 export function showModal() {
   modal.style.display = "flex";
@@ -30,6 +37,7 @@ export function hideModal() {
 }
 
 export function openTaskForm(task = null, statusDefault = null) {
+  populateCategoryDropdown();
   const editingTaskDescription = task ? task.description : null;
   setEditingTaskId(editingTaskDescription);
 
@@ -54,7 +62,7 @@ export function openTaskForm(task = null, statusDefault = null) {
   } else {
     formTitle.textContent = "New Task";
     formDeleteTaskBtn.style.display = "none";
-    taskCategory.value = "frontend";
+    taskCategory.value = getCategories()[0] || "frontend";
     taskPriority.value = "none";
     taskPasses.checked = statusDefault === "completed";
     taskStatus.value = statusDefault || "";

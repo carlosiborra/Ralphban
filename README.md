@@ -172,6 +172,25 @@ When something stalls, loops, or fails, you see it immediately.
    - In the new window, create a file named `test.prd.json` with some tasks.
    - Click the **Ralphban** icon in the sidebar to see your board!
 
+### Building & Packaging
+
+To compile TypeScript and create a `.vsix` package for distribution:
+
+```bash
+# Compile TypeScript
+pnpm run compile
+
+# Package the extension
+npx vsce package
+```
+
+The resulting `ralphban-X.X.X.vsix` file can be installed in VS Code via:
+
+- **Extensions**: `...` menu → "Install from VSIX"
+- **Command Palette**: "Extensions: Install from VSIX"
+
+> **Note**: This is a pnpm project. Use `pnpm install` instead of `npm install`.
+
 ### Architecture at a Glance
 
 ```

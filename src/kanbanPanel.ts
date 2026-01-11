@@ -115,9 +115,21 @@ export class KanbanPanel {
 
     try {
       const taskFile = await parseTaskFile(this._currentFile);
+      const config = vscode.workspace.getConfiguration("ralphban");
+      const categories = config.get<string[]>("categories") || [
+        "frontend",
+        "backend",
+        "database",
+        "testing",
+        "documentation",
+        "infrastructure",
+        "security",
+        "functional",
+      ];
       await this.panel.webview.postMessage({
         type: "update",
         data: taskFile,
+        categories,
       });
     } catch (error) {
       if (error instanceof ParseError) {

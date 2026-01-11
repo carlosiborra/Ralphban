@@ -14,17 +14,7 @@
       "properties": {
         "category": {
           "type": "string",
-          "description": "The category of the task",
-          "enum": [
-            "frontend",
-            "backend",
-            "database",
-            "testing",
-            "documentation",
-            "infrastructure",
-            "security",
-            "functional"
-          ]
+          "description": "The category of the task"
         },
         "description": {
           "type": "string",

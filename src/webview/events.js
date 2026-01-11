@@ -6,7 +6,7 @@ import {
   closeButton,
   modal,
 } from "./dom.js";
-import { setFilters, updateFilter, getCurrentTasks } from "./state.js";
+import { setFilters, updateFilter, getCurrentTasks, setCategories } from "./state.js";
 import { applyFilters } from "./task-utils.js";
 import { hideModal } from "./form.js";
 import { renderBoard } from "./renderer.js";
@@ -64,6 +64,9 @@ export function setupMessageListener() {
     const message = event.data;
     switch (message.type) {
       case "update":
+        if (message.categories) {
+          setCategories(message.categories);
+        }
         renderBoard(message.data, openTaskForm);
         break;
     }

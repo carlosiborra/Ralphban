@@ -159,6 +159,23 @@
             "type": "string"
           }
         },
+        "ralphban.categories": {
+          "type": "array",
+          "default": [
+            "frontend",
+            "backend",
+            "database",
+            "testing",
+            "documentation",
+            "infrastructure",
+            "security",
+            "functional"
+          ],
+          "description": "Custom categories available in the Kanban board dropdown",
+          "items": {
+            "type": "string"
+          }
+        },
         "ralphban.featureFlags.enablePercentageCounter": {
           "type": "boolean",
           "default": true,
@@ -181,7 +198,7 @@
     "@eslint/js": "^9.39.2",
     "@types/mocha": "^10.0.10",
     "@types/node": "^25.0.6",
-    "@types/vscode": "^1.108.1",
+    "@types/vscode": "^1.100.0",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.7.1",
     "eslint": "^9.39.2",
