@@ -1,9 +1,9 @@
 {
   "name": "ralphban",
-  "displayName": "Ralphban - Kanban Board Visualizer",
+  "displayName": "Ralphban - Ralph's Kanban Board",
   "version": "1.0.0",
   "icon": "images/icon_128_128.png",
-  "description": "An extension that reads task JSON files and visualizes them as an interactive Kanban board with drag-and-drop functionality",
+  "description": "An extension for visualizing tasks in a Kanban for LLM agents running in Ralph Wiggum mode",
   "main": "./out/extension.js",
   "scripts": {
     "vscode:prepublish": "pnpm run compile:prod",
@@ -32,7 +32,7 @@
     "onCommand:ralphban.forceReopenBoard",
     "onStartupFinished"
   ],
-  "publisher": "ralphban-publisher",
+  "publisher": "carlosiborra",
   "repository": {
     "type": "git",
     "url": "https://github.com/carlosiborra/ralphban.git"
@@ -57,7 +57,7 @@
     "Visualization"
   ],
   "author": {
-    "name": "Carlos Iborra",
+    "name": "Carlos Iborra Llopis",
     "email": "admin@carlosiborra.com",
     "url": "https://github.com/carlosiborra"
   },

@@ -189,22 +189,7 @@ The resulting `ralphban-X.X.X.vsix` file can be installed in VS Code via:
 - **Extensions**: `...` menu → "Install from VSIX"
 - **Command Palette**: "Extensions: Install from VSIX"
 
-> **Note**: This is a pnpm project. Use `pnpm install` instead of `npm install`.
-
-### Publishing to Marketplace
-
-To publish a new version to the VS Code Marketplace:
-
-```bash
-# Compile and publish in one command
-pnpm exec vsce publish --no-dependencies
-```
-
-Before publishing for the first time:
-
-1. Create a publisher account at https://marketplace.visualstudio.com/manage/publishers/
-2. Generate a Personal Access Token (PAT) with "Marketplace" scope
-3. Run `pnpm exec vsce login` to authenticate
+> **Note**: This is a pnpm project. Use `pnpm install` instead of `npm install`.\
 
 ### Architecture at a Glance
 
