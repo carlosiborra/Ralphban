@@ -32,11 +32,59 @@
         </div>
     </div>
 
-    <!-- Task Details Modal -->
+    <!-- Task Form Modal -->
     <div id="task-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <div id="modal-body"></div>
+            <div class="modal-body-container">
+                <div id="modal-body"></div>
+                <form id="task-form" style="display: none;">
+                    <h2 id="form-title">Task</h2>
+                    <div class="form-group">
+                        <label for="task-category">Category *</label>
+                        <select id="task-category" required>
+                            <option value="frontend">Frontend</option>
+                            <option value="backend">Backend</option>
+                            <option value="database">Database</option>
+                            <option value="testing">Testing</option>
+                            <option value="documentation">Documentation</option>
+                            <option value="infrastructure">Infrastructure</option>
+                            <option value="security">Security</option>
+                            <option value="functional">Functional</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-priority">Priority</label>
+                        <select id="task-priority">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-status">Status</label>
+                        <select id="task-status">
+                            <option value="pending">Pending</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-description">Description *</label>
+                        <textarea id="task-description" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Steps</label>
+                        <div id="steps-container"></div>
+                        <button type="button" id="add-step-btn">+ Add Step</button>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" id="save-task-btn">Save Task</button>
+                        <button type="button" id="cancel-edit-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

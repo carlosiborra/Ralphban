@@ -163,6 +163,164 @@ body {
     color: var(--vscode-editor-foreground);
 }
 
+.modal-body-container {
+    position: relative;
+}
+
+.task-actions {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--vscode-panel-border);
+}
+
+.task-actions button {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+}
+
+.task-actions button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+/* Form Styling */
+#task-form h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--vscode-input-border);
+    border-radius: var(--border-radius);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    font-family: var(--vscode-font-family);
+    box-sizing: border-box;
+}
+
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--vscode-focusBorder);
+}
+
+.step-input {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.step-input input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--vscode-input-border);
+    border-radius: var(--border-radius);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    font-family: var(--vscode-font-family);
+    box-sizing: border-box;
+}
+
+.step-input input:focus {
+    outline: none;
+    border-color: var(--vscode-focusBorder);
+}
+
+.remove-step-btn {
+    background: none;
+    border: 1px solid var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    width: 30px;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    font-size: 18px;
+    padding: 0;
+}
+
+.remove-step-btn:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+#add-step-btn {
+    margin-top: 8px;
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    border: 1px solid var(--vscode-button-border);
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+}
+
+#add-step-btn:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.form-actions button {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--border-radius);
+}
+
+#save-task-btn {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+}
+
+#save-task-btn:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+#cancel-edit-btn {
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+}
+
+#cancel-edit-btn:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+/* Add Task Button */
+.add-task-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    border: 1px dashed var(--vscode-button-border);
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    font-family: var(--vscode-font-family);
+}
+
+.add-task-btn:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+    border-style: solid;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
     width: 10px;
