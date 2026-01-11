@@ -174,6 +174,116 @@ body {
     word-wrap: break-word;
 }
 
+.task-description p {
+    margin: 0;
+}
+
+.task-description p:last-child {
+    margin-bottom: 0;
+}
+
+/* Markdown content styling */
+.markdown-content {
+    line-height: 1.6;
+    padding-left: 20px;
+}
+
+.markdown-content p {
+    margin: 8px 0;
+}
+
+.markdown-content code {
+    background-color: var(--vscode-textCodeBlock-background);
+    color: var(--vscode-textCodeBlock-foreground);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: var(--vscode-editor-font-family);
+    font-size: 0.9em;
+}
+
+.markdown-content pre {
+    background-color: var(--vscode-textCodeBlock-background);
+    color: var(--vscode-textCodeBlock-foreground);
+    padding: 12px;
+    border-radius: var(--border-radius);
+    overflow-x: auto;
+    margin: 12px 0;
+}
+
+.markdown-content pre code {
+    background: none;
+    padding: 0;
+}
+
+.markdown-content strong {
+    font-weight: 600;
+}
+
+.markdown-content em {
+    font-style: italic;
+}
+
+.markdown-content a {
+    color: var(--vscode-textLink-foreground);
+    text-decoration: underline;
+}
+
+.markdown-content a:hover {
+    color: var(--vscode-textLink-activeForeground);
+}
+
+.markdown-content ul,
+.markdown-content ol {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.markdown-content li {
+    margin: 4px 0;
+}
+
+.markdown-content blockquote {
+    border-left: 4px solid var(--vscode-textLink-foreground);
+    margin: 12px 0;
+    padding-left: 12px;
+    color: var(--vscode-descriptionForeground);
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+    margin: 16px 0 8px 0;
+    font-weight: 600;
+}
+
+.markdown-content h1 {
+    font-size: 1.4em;
+}
+
+.markdown-content h2 {
+    font-size: 1.2em;
+}
+
+.markdown-content h3 {
+    font-size: 1.1em;
+}
+
+/* Task detail modal markdown */
+.task-detail-description {
+    font-size: 1.1em;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.task-detail-description p {
+    margin: 8px 0;
+}
+
+.task-detail-description strong {
+    font-weight: 600;
+}
+
 .task-footer {
     display: flex;
     gap: 12px;

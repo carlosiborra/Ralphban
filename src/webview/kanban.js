@@ -74,7 +74,8 @@
     function renderBoard(data) {
         currentTasks = data.tasks;
         featureTitle.textContent = data.feature || 'PRD';
-        featureDescription.textContent = data.description || '';
+        const renderMarkdown = typeof window.marked !== 'undefined' ? window.marked.parse : (text) => text;
+        featureDescription.innerHTML = renderMarkdown(data.description || '');
 
         const filteredTasks = getFilteredTasks(currentTasks);
         
@@ -125,14 +126,15 @@
     function createTaskCard(task) {
         const clone = taskCardTemplate.content.cloneNode(true);
         const card = clone.querySelector('.task-card');
-        
+
         card.querySelector('.task-category').textContent = task.category;
-        
+
         const priorityEl = card.querySelector('.task-priority');
         priorityEl.textContent = task.priority || 'low';
         priorityEl.classList.add(task.priority?.toLowerCase() || 'low');
 
-        card.querySelector('.task-description').textContent = task.description;
+        const descEl = card.querySelector('.task-description');
+        descEl.innerHTML = typeof window.marked !== 'undefined' ? window.marked.parse(task.description) : task.description;
         
         const stepsCount = task.steps?.length || 0;
         card.querySelector('.task-steps-count').textContent = `Steps: ${stepsCount}`;
@@ -204,21 +206,22 @@
 
     function showTaskDetails(task) {
         const taskId = task.id || task.description;
+        const renderMarkdown = typeof window.marked !== 'undefined' ? window.marked.parse : (text) => text;
         modalBody.innerHTML = `
-            <h2>${task.description}</h2>
+            <div class="task-detail-description">${renderMarkdown(task.description)}</div>
             <p><strong>Status:</strong> ${task.status || 'pending'}</p>
             <p><strong>Category:</strong> ${task.category}</p>
             <p><strong>Priority:</strong> ${task.priority || 'low'}</p>
 
             <h3>Steps</h3>
-            <ul>
-                ${task.steps.map(step => `<li>${step}</li>`).join('')}
+            <ul class="markdown-content">
+                ${task.steps.map(step => `<li>${renderMarkdown(step)}</li>`).join('')}
             </ul>
 
             ${(task.dependencies && task.dependencies.length > 0) ? `
                 <h3>Dependencies</h3>
-                <ul>
-                    ${task.dependencies.map(dep => `<li>${dep}</li>`).join('')}
+                <ul class="markdown-content">
+                    ${task.dependencies.map(dep => `<li>${renderMarkdown(dep)}</li>`).join('')}
                 </ul>
             ` : ''}
 
