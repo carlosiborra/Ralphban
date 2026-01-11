@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/task-schema.json",
+  "title": "Task File Schema",
+  "description": "Schema for validating task JSON files used by the Kanban board extension",
+  "type": "object",
+  "required": ["feature", "description", "tasks"],
+  "properties": {
+    "feature": {
+      "type": "string",
+      "description": "The name or title of the feature/project",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of the feature/project"
+    },
+    "tasks": {
+      "type": "array",
+      "description": "List of tasks in the project",
+      "items": {
+        "$ref": "#/definitions/task"
+      }
+    }
+  },
+  "definitions": {
+    "task": {
+      "type": "object",
+      "required": ["category", "description", "steps", "dependencies", "status", "passes"],
+      "properties": {
+        "category": {
+          "type": "string",
+          "description": "The category of the task",
+          "enum": ["frontend", "backend", "database", "testing", "documentation", "infrastructure", "security"]
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the task",
+          "minLength": 1
+        },
+        "steps": {
+          "type": "array",
+          "description": "List of steps to complete the task",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "dependencies": {
+          "type": "array",
+          "description": "List of task descriptions that this task depends on",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "type": "string",
+          "description": "Current status of the task",
+          "enum": ["pending", "in_progress", "completed", "cancelled"]
+        },
+        "passes": {
+          "type": "boolean",
+          "description": "Whether the task passes its criteria"
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the task",
+          "pattern": ".+",
+          "minLength": 1
+        },
+        "priority": {
+          "type": "string",
+          "description": "Priority level of the task",
+          "enum": ["high", "medium", "low"]
+        }
+      }
+    }
+  }
+}
