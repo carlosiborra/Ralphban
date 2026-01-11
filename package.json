@@ -16,6 +16,8 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "node ./out/test/runTest.js",
+    "test:slow": "SLOW_TESTS=true node ./out/test/runTest.js",
+    "test:fast": "node ./out/test/runTest.js",
     "prepare": "husky"
   },
   "engines": {
@@ -26,6 +28,7 @@
     "onCommand:ralphban.openKanbanBoard",
     "onCommand:ralphban.createKanbanBoard",
     "onCommand:ralphban.refreshBoardList",
+    "onCommand:ralphban.forceReopenBoard",
     "onStartupFinished"
   ],
   "publisher": "ralphban-publisher",
@@ -106,6 +109,11 @@
         "title": "Refresh Kanban Boards",
         "category": "Ralphban",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "ralphban.forceReopenBoard",
+        "title": "Force Reopen Kanban Board (Test)",
+        "category": "Ralphban"
       }
     ],
     "menus": {
@@ -150,6 +158,21 @@
           "items": {
             "type": "string"
           }
+        },
+        "ralphban.featureFlags.enablePercentageCounter": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show task completion percentage in the stats bar"
+        },
+        "ralphban.featureFlags.enableDragDrop": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable drag and drop functionality for moving tasks between columns"
+        },
+        "ralphban.featureFlags.enableFilters": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable search and filter functionality"
         }
       }
     }
@@ -164,6 +187,7 @@
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
+    "glob": "^11.0.0",
     "globals": "^17.0.0",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",

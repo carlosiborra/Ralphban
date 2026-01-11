@@ -52,6 +52,12 @@ export class KanbanPanel {
     this.panel.dispose();
   }
 
+  public static closeCurrentPanel(): void {
+    if (KanbanPanel.currentPanel) {
+      KanbanPanel.currentPanel.dispose();
+    }
+  }
+
   public static async createOrShow(extensionUri: vscode.Uri, taskFileUri?: vscode.Uri) {
     const column = vscode.window.activeTextEditor?.viewColumn ?? vscode.ViewColumn.One;
 

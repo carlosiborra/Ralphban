@@ -52,7 +52,7 @@
           "enum": ["pending", "in_progress", "completed", "cancelled"]
         },
         "passes": {
-          "type": "boolean",
+          "type": ["boolean", "null"],
           "description": "Whether the task passes its criteria"
         },
         "priority": {

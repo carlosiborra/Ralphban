@@ -92,6 +92,30 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
+  context.subscriptions.push(
+    vscode.commands.registerCommand("ralphban.forceReopenBoard", async (uri?: vscode.Uri) => {
+      let targetUri = uri;
+
+      if (!targetUri) {
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor && isTaskFileUri(activeEditor.document.uri)) {
+          targetUri = activeEditor.document.uri;
+        } else {
+          targetUri = await findTaskFileByName("prd.json");
+        }
+      }
+
+      if (!targetUri) {
+        return;
+      }
+
+      KanbanPanel.closeCurrentPanel();
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await KanbanPanel.createOrShow(context.extensionUri, targetUri);
+    })
+  );
+
   const updateContext = () => {
     const activeEditor = vscode.window.activeTextEditor;
     if (activeEditor && isTaskFileUri(activeEditor.document.uri)) {

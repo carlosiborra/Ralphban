@@ -121,6 +121,24 @@ You control which files are treated as boards.
 }
 ```
 
+### Feature Flags
+
+Ralphban supports feature flags to enable or disable specific functionality:
+
+```json
+{
+  "ralphban.featureFlags.enablePercentageCounter": true,
+  "ralphban.featureFlags.enableDragDrop": true,
+  "ralphban.featureFlags.enableFilters": true
+}
+```
+
+| Feature Flag              | Default | Description                                                         |
+| :------------------------ | :------ | :------------------------------------------------------------------ |
+| `enablePercentageCounter` | `true`  | Show task completion percentage in the stats bar                    |
+| `enableDragDrop`          | `true`  | Enable drag and drop functionality for moving tasks between columns |
+| `enableFilters`           | `true`  | Enable search and filter functionality                              |
+
 ## Why a Kanban?
 
 Because task state is the most important signal when debugging agent behavior.

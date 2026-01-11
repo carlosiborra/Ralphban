@@ -42,6 +42,9 @@ importers:
       eslint-plugin-prettier:
         specifier: ^5.5.4
         version: 5.5.4(@types/eslint@9.6.1)(eslint-config-prettier@10.1.8(eslint@9.39.2))(eslint@9.39.2)(prettier@3.7.4)
+      glob:
+        specifier: ^11.0.0
+        version: 11.1.0
       globals:
         specifier: ^17.0.0
         version: 17.0.0
