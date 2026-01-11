@@ -77,6 +77,12 @@ export class KanbanPanel {
     }
   }
 
+  public static async refreshIfOpen(uri: vscode.Uri): Promise<void> {
+    if (KanbanPanel.currentPanel?._currentFile?.toString() === uri.toString()) {
+      await KanbanPanel.currentPanel.refreshContent();
+    }
+  }
+
   public async setTaskFile(uri: vscode.Uri) {
     this._currentFile = uri;
     this.panel.title = `Kanban Board — ${path.basename(uri.fsPath)}`;

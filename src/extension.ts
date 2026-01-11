@@ -109,6 +109,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidSaveTextDocument((e) => {
       if (isTaskFileUri(e.uri)) {
         provider.refreshBoardList();
+        KanbanPanel.refreshIfOpen(e.uri);
       }
     })
   );
