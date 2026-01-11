@@ -65,18 +65,54 @@
 
         card.addEventListener('click', () => showTaskDetails(task));
 
-        // Drag and Drop (Placeholder for now, but enabling visual part)
+        // Drag and Drop
         card.addEventListener('dragstart', (e) => {
             card.classList.add('dragging');
             e.dataTransfer.setData('text/plain', task.id || task.description);
+            e.dataTransfer.effectAllowed = 'move';
         });
 
         card.addEventListener('dragend', () => {
-            card.classList.add('dragging');
+            card.classList.remove('dragging');
         });
 
         return card;
     }
+
+    // Setup drop zones for columns
+    document.querySelectorAll('.column').forEach(column => {
+        column.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            column.classList.add('drag-over');
+        });
+
+        column.addEventListener('dragleave', () => {
+            column.classList.remove('drag-over');
+        });
+
+        column.addEventListener('drop', (e) => {
+            e.preventDefault();
+            column.classList.remove('drag-over');
+            
+            const taskId = e.dataTransfer.getData('text/plain');
+            const newStatus = column.id;
+            
+            const task = currentTasks.find(t => (t.id || t.description) === taskId);
+            if (task && task.status !== newStatus) {
+                // Optimistic UI update
+                task.status = newStatus;
+                renderBoard({ tasks: currentTasks, feature: featureTitle.textContent, description: featureDescription.textContent });
+                
+                // Notify extension
+                vscode.postMessage({
+                    type: 'updateTaskStatus',
+                    taskId: taskId,
+                    newStatus: newStatus
+                });
+            }
+        });
+    });
 
     function renderStats(tasks) {
         const total = tasks.length;

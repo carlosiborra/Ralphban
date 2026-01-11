@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import { handleWebviewMessage } from './messageHandler';
 
 export class KanbanViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'kanbanBoard';
   private _view?: vscode.WebviewView;
+  private _currentFile?: vscode.Uri;
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
@@ -26,15 +28,18 @@ export class KanbanViewProvider implements vscode.WebviewViewProvider {
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-    webviewView.webview.onDidReceiveMessage(data => {
-      switch (data.type) {
-        case 'onInfo': {
-          vscode.window.showInformationMessage(data.value);
-          break;
-        }
-        case 'onError': {
-          vscode.window.showErrorMessage(data.value);
-          break;
+    webviewView.webview.onDidReceiveMessage(async data => {
+      if (this._currentFile) {
+        await handleWebviewMessage(data, this._currentFile, this._view);
+      } else {
+        // Fallback for simple messages if no file is selected yet
+        switch (data.type) {
+          case 'onInfo':
+            vscode.window.showInformationMessage(data.value || data.data);
+            break;
+          case 'onError':
+            vscode.window.showErrorMessage(data.value || data.data);
+            break;
         }
       }
     });
@@ -42,6 +47,10 @@ export class KanbanViewProvider implements vscode.WebviewViewProvider {
     webviewView.onDidDispose(() => {
       this._view = undefined;
     });
+  }
+
+  public setTaskFile(uri: vscode.Uri) {
+    this._currentFile = uri;
   }
 
   public postMessage(message: any) {
