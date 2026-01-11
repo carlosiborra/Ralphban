@@ -1,6 +1,11 @@
 import * as vscode from 'vscode';
 import { Task, TaskFile } from './types';
 
+function getFilePatterns(): string[] {
+	const config = vscode.workspace.getConfiguration('ralphban');
+	return config.get<string[]>('filePatterns', ['**/*.prd.json', '**/prd.json', '**/tasks.json']);
+}
+
 export async function findTaskFiles(): Promise<vscode.Uri[]> {
 	const validUris: vscode.Uri[] = [];
 
@@ -9,13 +14,18 @@ export async function findTaskFiles(): Promise<vscode.Uri[]> {
 	}
 
 	try {
-		const jsonFiles = await vscode.workspace.findFiles(
-			'**/*.json',
-			'**/{node_modules,.git,.vscode,out,dist}/**',
-			100
-		);
+		const patterns = getFilePatterns();
+		const excludePatterns = ['**/{node_modules,.git,.vscode,out,dist}/**'];
 
-		for (const fileUri of jsonFiles) {
+		const allUris: vscode.Uri[] = [];
+		for (const pattern of patterns) {
+			const files = await vscode.workspace.findFiles(pattern, excludePatterns.join(','), 100);
+			allUris.push(...files);
+		}
+
+		const uniqueUris = Array.from(new Map(allUris.map(uri => [uri.toString(), uri])).values());
+
+		for (const fileUri of uniqueUris) {
 			try {
 				const content = await vscode.workspace.fs.readFile(fileUri);
 				const jsonString = new TextDecoder().decode(content);
@@ -42,12 +52,7 @@ function isValidTaskFile(data: unknown): data is TaskFile {
 
 	const obj = data as Record<string, unknown>;
 
-	if (
-		typeof obj.feature !== 'string' ||
-		typeof obj.description !== 'string' ||
-		!Array.isArray(obj.tasks) ||
-		obj.tasks.length === 0
-	) {
+	if (!Array.isArray(obj.tasks)) {
 		return false;
 	}
 
@@ -60,12 +65,11 @@ function isValidTaskFile(data: unknown): data is TaskFile {
 
 		return (
 			typeof taskObj.description === 'string' &&
-			typeof taskObj.status === 'string' &&
-			['pending', 'in_progress', 'completed', 'cancelled'].includes(taskObj.status) &&
+			(taskObj.status === undefined || (typeof taskObj.status === 'string' && ['pending', 'in_progress', 'completed', 'cancelled'].includes(taskObj.status))) &&
 			typeof taskObj.category === 'string' &&
-			['frontend', 'backend', 'database', 'testing', 'documentation', 'infrastructure', 'security'].includes(taskObj.category) &&
+			['frontend', 'backend', 'database', 'testing', 'documentation', 'infrastructure', 'security', 'functional'].includes(taskObj.category) &&
 			Array.isArray(taskObj.steps) &&
-			Array.isArray(taskObj.dependencies) &&
+			(taskObj.dependencies === undefined || Array.isArray(taskObj.dependencies)) &&
 			typeof taskObj.passes === 'boolean'
 		);
 	});
@@ -81,4 +85,17 @@ export async function findTaskFileByName(fileName: string = 'prd.json'): Promise
 	}
 
 	return uris.length > 0 ? uris[0] : undefined;
+}
+
+export function isTaskFileUri(uri: vscode.Uri): boolean {
+	const patterns = getFilePatterns();
+	const relativePath = vscode.workspace.asRelativePath(uri, false);
+	
+	for (const pattern of patterns) {
+		if (relativePath.includes(pattern.replace('**/', '').replace('*', ''))) {
+			return true;
+		}
+	}
+	
+	return false;
 }

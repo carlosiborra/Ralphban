@@ -2,6 +2,7 @@
   "name": "ralphban",
   "displayName": "Ralphban - Kanban Board Visualizer",
   "version": "1.0.0",
+  "icon": "images/icon.png",
   "description": "An extension that reads task JSON files and visualizes them as an interactive Kanban board with drag-and-drop functionality",
   "main": "./out/extension.js",
   "scripts": {
@@ -16,8 +17,7 @@
     "vscode": "^1.108.0"
   },
   "activationEvents": [
-    "onCommand:ralphban.openKanbanBoard",
-    "onView:kanbanBoard"
+    "onCommand:ralphban.openKanbanBoard"
   ],
   "publisher": "ralphban-publisher",
   "keywords": [
@@ -29,40 +29,35 @@
   "author": "",
   "license": "ISC",
   "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "kanban-explorer",
-          "title": "Kanban",
-          "icon": "$(layout-kanban)"
-        }
-      ]
-    },
-    "views": {
-      "kanban-explorer": [
-        {
-          "type": "webview",
-          "id": "kanbanBoard",
-          "name": "Kanban Board"
-        }
-      ]
-    },
     "commands": [
       {
         "command": "ralphban.openKanbanBoard",
         "title": "Open Kanban Board",
         "category": "Ralphban",
-        "icon": "$(layout-kanban)"
+        "icon": "images/icon.png"
       }
     ],
     "menus": {
       "editor/title": [
         {
           "command": "ralphban.openKanbanBoard",
-          "when": "resourceFilename == 'prd.json'",
+          "when": "ralphban.isTaskFile",
           "group": "navigation@0"
         }
       ]
+    },
+    "configuration": {
+      "title": "Ralphban",
+      "properties": {
+        "ralphban.filePatterns": {
+          "type": "array",
+          "default": ["**/*.prd.json", "**/prd.json", "**/tasks.json"],
+          "description": "Glob patterns to identify task/PRD files in the workspace",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "devDependencies": {
