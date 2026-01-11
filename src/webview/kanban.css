@@ -239,6 +239,15 @@ body {
     background-color: var(--vscode-button-hoverBackground);
 }
 
+.delete-task-btn {
+    background-color: var(--vscode-errorBackground) !important;
+    color: var(--vscode-errorForeground) !important;
+}
+
+.delete-task-btn:hover {
+    background-color: #5a1d1d !important;
+}
+
 /* Form Styling */
 #task-form h2 {
     margin-top: 0;

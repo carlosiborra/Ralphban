@@ -203,6 +203,7 @@
     }
 
     function showTaskDetails(task) {
+        const taskId = task.id || task.description;
         modalBody.innerHTML = `
             <h2>${task.description}</h2>
             <p><strong>Status:</strong> ${task.status || 'pending'}</p>
@@ -223,6 +224,7 @@
 
             <div class="task-actions">
                 <button id="edit-task-btn">Edit</button>
+                <button id="delete-task-btn" class="delete-task-btn">Delete</button>
             </div>
         `;
         modalBody.style.display = 'block';
@@ -230,6 +232,13 @@
 
         document.getElementById('edit-task-btn').addEventListener('click', () => {
             openTaskForm(task);
+        });
+
+        document.getElementById('delete-task-btn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
+                vscode.postMessage({ type: 'deleteTask', taskId });
+                modal.style.display = 'none';
+            }
         });
 
         modal.style.display = 'block';
