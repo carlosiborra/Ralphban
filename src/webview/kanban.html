@@ -11,6 +11,27 @@
     <div class="header">
         <h1 id="feature-title">Kanban Board</h1>
         <p id="feature-description"></p>
+        <div class="search-filters">
+            <input type="text" id="search-input" placeholder="Search tasks..." class="search-input">
+            <select id="filter-category" class="filter-dropdown">
+                <option value="">All Categories</option>
+                <option value="frontend">Frontend</option>
+                <option value="backend">Backend</option>
+                <option value="database">Database</option>
+                <option value="testing">Testing</option>
+                <option value="documentation">Documentation</option>
+                <option value="infrastructure">Infrastructure</option>
+                <option value="security">Security</option>
+                <option value="functional">Functional</option>
+            </select>
+            <select id="filter-priority" class="filter-dropdown">
+                <option value="">All Priorities</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+            <button id="clear-filters-btn" class="clear-filters-btn" style="display: none;">Clear</button>
+        </div>
         <div class="stats" id="stats-container"></div>
     </div>
     <div class="board" id="board">

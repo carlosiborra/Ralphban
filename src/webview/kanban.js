@@ -6,6 +6,10 @@
     const featureDescription = document.getElementById('feature-description');
     const statsContainer = document.getElementById('stats-container');
     const taskCardTemplate = document.getElementById('task-card-template');
+    const searchInput = document.getElementById('search-input');
+    const filterCategory = document.getElementById('filter-category');
+    const filterPriority = document.getElementById('filter-priority');
+    const clearFiltersBtn = document.getElementById('clear-filters-btn');
 
     // Modal elements
     const modal = document.getElementById('task-modal');
@@ -27,6 +31,11 @@
 
     let currentTasks = [];
     let editingTaskId = null;
+    let filters = {
+        search: '',
+        category: '',
+        priority: ''
+    };
 
     // Handle messages from the extension
     window.addEventListener('message', event => {
@@ -38,10 +47,40 @@
         }
     });
 
+    // Filter event listeners
+    searchInput.addEventListener('input', (e) => {
+        filters.search = e.target.value.toLowerCase();
+        applyFilters();
+    });
+
+    filterCategory.addEventListener('change', (e) => {
+        filters.category = e.target.value;
+        applyFilters();
+    });
+
+    filterPriority.addEventListener('change', (e) => {
+        filters.priority = e.target.value;
+        applyFilters();
+    });
+
+    clearFiltersBtn.addEventListener('click', () => {
+        filters = { search: '', category: '', priority: '' };
+        searchInput.value = '';
+        filterCategory.value = '';
+        filterPriority.value = '';
+        applyFilters();
+    });
+
     function renderBoard(data) {
         currentTasks = data.tasks;
         featureTitle.textContent = data.feature || 'PRD';
         featureDescription.textContent = data.description || '';
+
+        const filteredTasks = getFilteredTasks(currentTasks);
+        
+        // Show/hide clear filters button
+        const hasActiveFilters = filters.search || filters.category || filters.priority;
+        clearFiltersBtn.style.display = hasActiveFilters ? 'inline-block' : 'none';
 
         const columns = ['pending', 'in_progress', 'completed', 'cancelled'];
 
@@ -49,7 +88,7 @@
             const columnEl = document.querySelector(`#${status} .task-list`);
             columnEl.innerHTML = '';
 
-            const tasks = currentTasks.filter(t => (t.status || 'pending') === status);
+            const tasks = filteredTasks.filter(t => (t.status || 'pending') === status);
             tasks.forEach(task => {
                 const card = createTaskCard(task);
                 columnEl.appendChild(card);
@@ -62,7 +101,25 @@
             columnEl.appendChild(addTaskBtn);
         });
 
-        renderStats(currentTasks);
+        renderStats(filteredTasks);
+    }
+
+    function applyFilters() {
+        renderBoard({ tasks: currentTasks, feature: featureTitle.textContent, description: featureDescription.textContent });
+    }
+
+    function getFilteredTasks(tasks) {
+        return tasks.filter(task => {
+            const matchesSearch = !filters.search || 
+                task.description.toLowerCase().includes(filters.search) ||
+                (task.steps && task.steps.some(step => step.toLowerCase().includes(filters.search)));
+            
+            const matchesCategory = !filters.category || task.category === filters.category;
+            
+            const matchesPriority = !filters.priority || (task.priority || 'low') === filters.priority;
+            
+            return matchesSearch && matchesCategory && matchesPriority;
+        });
     }
 
     function createTaskCard(task) {

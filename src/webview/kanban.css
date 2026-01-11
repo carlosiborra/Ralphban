@@ -40,6 +40,59 @@ body {
     font-size: 0.9em;
 }
 
+.search-filters {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 12px;
+    border: 1px solid var(--vscode-input-border);
+    border-radius: var(--border-radius);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    font-family: var(--vscode-font-family);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--vscode-focusBorder);
+}
+
+.filter-dropdown {
+    padding: 8px 12px;
+    border: 1px solid var(--vscode-input-border);
+    border-radius: var(--border-radius);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    font-family: var(--vscode-font-family);
+    cursor: pointer;
+}
+
+.filter-dropdown:focus {
+    outline: none;
+    border-color: var(--vscode-focusBorder);
+}
+
+.clear-filters-btn {
+    padding: 8px 12px;
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    border: 1px solid var(--vscode-button-border);
+    cursor: pointer;
+    border-radius: var(--border-radius);
+    font-family: var(--vscode-font-family);
+}
+
+.clear-filters-btn:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
 .board {
     display: flex;
     padding: var(--container-padding);
