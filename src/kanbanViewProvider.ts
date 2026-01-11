@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { handleWebviewMessage } from './messageHandler';
+import { parseTaskFile } from './jsonParser';
 
 export class KanbanViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'kanbanBoard';
@@ -49,8 +50,15 @@ export class KanbanViewProvider implements vscode.WebviewViewProvider {
     });
   }
 
-  public setTaskFile(uri: vscode.Uri) {
+  public async setTaskFile(uri: vscode.Uri) {
     this._currentFile = uri;
+    if (this._view) {
+      const taskFile = await parseTaskFile(uri);
+      this._view.webview.postMessage({
+        type: 'update',
+        data: taskFile
+      });
+    }
   }
 
   public postMessage(message: any) {

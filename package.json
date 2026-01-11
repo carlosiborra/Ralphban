@@ -51,7 +51,8 @@
       {
         "command": "ralphban.openKanbanBoard",
         "title": "Open Kanban Board",
-        "category": "Ralphban"
+        "category": "Ralphban",
+        "icon": "$(layout-kanban)"
       }
     ],
     "menus": {
@@ -59,7 +60,7 @@
         {
           "command": "ralphban.openKanbanBoard",
           "when": "resourceFilename == 'prd.json'",
-          "group": "navigation"
+          "group": "navigation@0"
         }
       ]
     },
