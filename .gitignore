@@ -1,4 +1,44 @@
-# Ralph code
-plans/*
+# VS Code Extension Build Artifacts
+out/
+dist/
+*.vsix
+
+# Dependencies
+node_modules/
+node_modules/*
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+.vscode-test/
+coverage/
+
+# OS Files
+.DS_Store
+Thumbs.db
+*.log
+
+# IDE
+.vscode/
+.cursor/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+.temp/
+
+# Personal/Development files (your current entries)
+plans/
 progress.txt
-node_modules
+
+# Environment variables (if you add any)
+.env
+.env.local
+cleanup-git-history.sh

@@ -1,16 +1,54 @@
+# Source and config
+src/**
+tsconfig*.json
+*.ts
+**/*.map
+
+# Dev tooling and CI
 .vscode/**
 .vscode-test/**
-src/**
+.github/**
+.idea/**
+.eslintrc*
+eslint.config.*
+.prettierrc*
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Tests and coverage
+test/**
+tests/**
+**/*.test.*
+**/*.spec.*
+coverage/**
+
+# Build outputs / temp
+*.vsix
+.temp/**
+dist/**
+
+# VCS
+.git/**
+.gitattributes
 .gitignore
-.yarnrc
-vsc-extension-quickstart.md
-**/tsconfig.json
-**/.eslintrc.json
-**/*.map
-**/*.ts
-**/node_modules/**
-.git/
-plans/
-progress.txt
-*.md
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+
+# Keep compiled output and required assets
+!out/**
+
+# Common assets people ship
 !README.md
+!LICENSE
+!CHANGELOG.md
+!images/**
+!schemas/**

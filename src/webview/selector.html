@@ -1,147 +1,150 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';"
+    />
     <style>
-        body {
-            padding: 10px;
-            color: var(--vscode-foreground);
-            font-family: var(--vscode-font-family);
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .board-item {
-            padding: 8px;
-            border: 1px solid var(--vscode-panel-border);
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--vscode-list-inactiveSelectionBackground);
-        }
-        .board-item:hover {
-            background-color: var(--vscode-list-hoverBackground);
-        }
-        .board-info {
-            display: flex;
-            flex-direction: column;
-        }
-        .board-name {
-            font-weight: bold;
-        }
-        .board-path {
-            font-size: 0.8em;
-            color: var(--vscode-descriptionForeground);
-        }
-        button {
-            background-color: var(--vscode-button-background);
-            color: var(--vscode-button-foreground);
-            border: none;
-            padding: 6px 12px;
-            border-radius: 2px;
-            cursor: pointer;
-            width: 100%;
-        }
-        button:hover {
-            background-color: var(--vscode-button-hoverBackground);
-        }
-        .empty-state {
-            text-align: center;
-            color: var(--vscode-descriptionForeground);
-            padding: 20px 0;
-        }
+      body {
+        padding: 10px;
+        color: var(--vscode-foreground);
+        font-family: var(--vscode-font-family);
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .board-item {
+        padding: 8px;
+        border: 1px solid var(--vscode-panel-border);
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: var(--vscode-list-inactiveSelectionBackground);
+      }
+      .board-item:hover {
+        background-color: var(--vscode-list-hoverBackground);
+      }
+      .board-info {
+        display: flex;
+        flex-direction: column;
+      }
+      .board-name {
+        font-weight: bold;
+      }
+      .board-path {
+        font-size: 0.8em;
+        color: var(--vscode-descriptionForeground);
+      }
+      button {
+        background-color: var(--vscode-button-background);
+        color: var(--vscode-button-foreground);
+        border: none;
+        padding: 6px 12px;
+        border-radius: 2px;
+        cursor: pointer;
+        width: 100%;
+      }
+      button:hover {
+        background-color: var(--vscode-button-hoverBackground);
+      }
+      .empty-state {
+        text-align: center;
+        color: var(--vscode-descriptionForeground);
+        padding: 20px 0;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="content" class="container">
-        <div class="empty-state">Scanning workspace...</div>
+      <div class="empty-state">Scanning workspace...</div>
     </div>
 
     <script nonce="${nonce}">
-        const vscode = acquireVsCodeApi();
+      const vscode = acquireVsCodeApi();
 
-        window.addEventListener('message', event => {
-            const message = event.data;
-            switch (message.type) {
-                case 'list':
-                    renderList(message.boards);
-                    break;
-            }
-        });
+      window.addEventListener("message", (event) => {
+        const message = event.data;
+        switch (message.type) {
+          case "list":
+            renderList(message.boards);
+            break;
+        }
+      });
 
-        function renderList(boards) {
-            const container = document.getElementById('content');
-            container.innerHTML = '';
+      function renderList(boards) {
+        const container = document.getElementById("content");
+        container.innerHTML = "";
 
-            if (boards.length === 0) {
-                const empty = document.createElement('div');
-                empty.className = 'empty-state';
-                empty.textContent = 'No Kanban boards found in workspace.';
-                container.appendChild(empty);
+        if (boards.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty-state";
+          empty.textContent = "No Kanban boards found in workspace.";
+          container.appendChild(empty);
 
-                const createBtn = document.createElement('button');
-                createBtn.textContent = 'Create New Board';
-                createBtn.onclick = () => vscode.postMessage({ type: 'create' });
-                container.appendChild(createBtn);
-                return;
-            }
-
-            if (boards.length === 1) {
-                const board = boards[0];
-                const openBtn = document.createElement('button');
-                openBtn.textContent = `Open Kanban (${board.name})`;
-                openBtn.onclick = () => vscode.postMessage({ type: 'open', uri: board.uri });
-                container.appendChild(openBtn);
-
-                const createBtn = document.createElement('button');
-                createBtn.style.marginTop = '12px';
-                createBtn.style.backgroundColor = 'transparent';
-                createBtn.style.border = '1px solid var(--vscode-button-background)';
-                createBtn.style.color = 'var(--vscode-button-background)';
-                createBtn.textContent = 'Create Another Board';
-                createBtn.onclick = () => vscode.postMessage({ type: 'create' });
-                container.appendChild(createBtn);
-                return;
-            }
-
-            // Several boards: List them
-            boards.forEach(board => {
-                const item = document.createElement('div');
-                item.className = 'board-item';
-                item.onclick = () => vscode.postMessage({ type: 'open', uri: board.uri });
-
-                const info = document.createElement('div');
-                info.className = 'board-info';
-                
-                const name = document.createElement('div');
-                name.className = 'board-name';
-                name.textContent = board.name;
-                
-                const path = document.createElement('div');
-                path.className = 'board-path';
-                path.textContent = board.path;
-
-                info.appendChild(name);
-                info.appendChild(path);
-                item.appendChild(info);
-                container.appendChild(item);
-            });
-
-            const createBtn = document.createElement('button');
-            createBtn.style.marginTop = '10px';
-            createBtn.textContent = '+ Create New Board';
-            createBtn.onclick = () => vscode.postMessage({ type: 'create' });
-            container.appendChild(createBtn);
+          const createBtn = document.createElement("button");
+          createBtn.textContent = "Create New Board";
+          createBtn.onclick = () => vscode.postMessage({ type: "create" });
+          container.appendChild(createBtn);
+          return;
         }
 
-        // Request initial list
-        vscode.postMessage({ type: 'ready' });
+        if (boards.length === 1) {
+          const board = boards[0];
+          const openBtn = document.createElement("button");
+          openBtn.textContent = `Open Kanban (${board.name})`;
+          openBtn.onclick = () => vscode.postMessage({ type: "open", uri: board.uri });
+          container.appendChild(openBtn);
+
+          const createBtn = document.createElement("button");
+          createBtn.style.marginTop = "12px";
+          createBtn.style.backgroundColor = "transparent";
+          createBtn.style.border = "1px solid var(--vscode-button-background)";
+          createBtn.style.color = "var(--vscode-button-background)";
+          createBtn.textContent = "Create Another Board";
+          createBtn.onclick = () => vscode.postMessage({ type: "create" });
+          container.appendChild(createBtn);
+          return;
+        }
+
+        // Several boards: List them
+        boards.forEach((board) => {
+          const item = document.createElement("div");
+          item.className = "board-item";
+          item.onclick = () => vscode.postMessage({ type: "open", uri: board.uri });
+
+          const info = document.createElement("div");
+          info.className = "board-info";
+
+          const name = document.createElement("div");
+          name.className = "board-name";
+          name.textContent = board.name;
+
+          const path = document.createElement("div");
+          path.className = "board-path";
+          path.textContent = board.path;
+
+          info.appendChild(name);
+          info.appendChild(path);
+          item.appendChild(info);
+          container.appendChild(item);
+        });
+
+        const createBtn = document.createElement("button");
+        createBtn.style.marginTop = "10px";
+        createBtn.textContent = "+ Create New Board";
+        createBtn.onclick = () => vscode.postMessage({ type: "create" });
+        container.appendChild(createBtn);
+      }
+
+      // Request initial list
+      vscode.postMessage({ type: "ready" });
     </script>
-</body>
+  </body>
 </html>

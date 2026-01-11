@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 export interface FileWatcherEvents {
   onChange: (uri: vscode.Uri) => void;
@@ -11,10 +11,13 @@ export class TaskFileWatcher {
   private readonly DEBOUNCE_MS = 300;
 
   constructor(
-    private uri: vscode.Uri,
+    uri: vscode.Uri,
     private events: FileWatcherEvents
   ) {
-    const pattern = new vscode.RelativePattern(vscode.workspace.getWorkspaceFolder(uri)!, uri.fsPath);
+    const pattern = new vscode.RelativePattern(
+      vscode.workspace.getWorkspaceFolder(uri)!,
+      uri.fsPath
+    );
     const watcher = vscode.workspace.createFileSystemWatcher(pattern);
 
     watcher.onDidChange(this.handleDidChange.bind(this));
@@ -45,15 +48,14 @@ export class TaskFileWatcher {
   }
 
   dispose(): void {
-    this.debounceTimers.forEach((timer) => clearTimeout(timer));
+    this.debounceTimers.forEach((timer) => {
+      clearTimeout(timer);
+    });
     this.debounceTimers.clear();
     this.disposable.dispose();
   }
 }
 
-export function createFileWatcher(
-  uri: vscode.Uri,
-  events: FileWatcherEvents
-): TaskFileWatcher {
+export function createFileWatcher(uri: vscode.Uri, events: FileWatcherEvents): TaskFileWatcher {
   return new TaskFileWatcher(uri, events);
 }

@@ -1,54 +1,47 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
-import * as fs from 'fs';
-import { handleWebviewMessage } from './messageHandler';
-import { parseTaskFile } from './jsonParser';
-import { TaskFileWatcher } from './fileWatcher';
-import { findTaskFiles } from './fileScanner';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as vscode from "vscode";
+import { findTaskFiles } from "./fileScanner";
+import type { TaskFileWatcher } from "./fileWatcher";
 
 export class KanbanViewProvider implements vscode.WebviewViewProvider {
-  public static readonly viewType = 'kanbanBoard';
+  public static readonly viewType = "kanbanBoard";
   private _view?: vscode.WebviewView;
-  private _currentFile?: vscode.Uri;
   private _watcher?: TaskFileWatcher;
 
-  constructor(
-    private readonly _extensionUri: vscode.Uri,
-  ) { }
+  constructor(private readonly _extensionUri: vscode.Uri) {}
 
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
     _context: vscode.WebviewViewResolveContext,
-    _token: vscode.CancellationToken,
+    _token: vscode.CancellationToken
   ) {
     this._view = webviewView;
 
     webviewView.webview.options = {
       enableScripts: true,
-      localResourceRoots: [
-        this._extensionUri
-      ]
+      localResourceRoots: [this._extensionUri],
     };
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-    webviewView.webview.onDidReceiveMessage(async data => {
+    webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
-        case 'ready':
+        case "ready":
           await this.refreshBoardList();
           break;
-        case 'open':
+        case "open":
           if (data.uri) {
-            vscode.commands.executeCommand('ralphban.openKanbanBoard', vscode.Uri.parse(data.uri));
+            vscode.commands.executeCommand("ralphban.openKanbanBoard", vscode.Uri.parse(data.uri));
           }
           break;
-        case 'create':
-          vscode.commands.executeCommand('ralphban.createKanbanBoard');
+        case "create":
+          vscode.commands.executeCommand("ralphban.createKanbanBoard");
           break;
-        case 'onInfo':
+        case "onInfo":
           vscode.window.showInformationMessage(data.value || data.data);
           break;
-        case 'onError':
+        case "onError":
           vscode.window.showErrorMessage(data.value || data.data);
           break;
       }
@@ -69,19 +62,19 @@ export class KanbanViewProvider implements vscode.WebviewViewProvider {
     }
 
     const files = await findTaskFiles();
-    const boards = files.map(uri => ({
+    const boards = files.map((uri) => ({
       name: path.basename(uri.fsPath),
       path: vscode.workspace.asRelativePath(uri),
-      uri: uri.toString()
+      uri: uri.toString(),
     }));
 
     await this._view.webview.postMessage({
-      type: 'list',
-      boards: boards
+      type: "list",
+      boards: boards,
     });
   }
 
-  public async setTaskFile(uri: vscode.Uri) {
+  public async setTaskFile(_uri: vscode.Uri) {
     // We no longer switch the sidebar to the full board view
     // Instead we just refresh the list to ensure the current file is there
     await this.refreshBoardList();
@@ -94,8 +87,8 @@ export class KanbanViewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
-    const htmlPath = path.join(this._extensionUri.fsPath, 'src', 'webview', 'selector.html');
-    let html = fs.readFileSync(htmlPath, 'utf8');
+    const htmlPath = path.join(this._extensionUri.fsPath, "src", "webview", "selector.html");
+    let html = fs.readFileSync(htmlPath, "utf8");
 
     const nonce = getNonce();
 
@@ -107,8 +100,8 @@ export class KanbanViewProvider implements vscode.WebviewViewProvider {
 }
 
 function getNonce() {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let text = "";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for (let i = 0; i < 32; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }

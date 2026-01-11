@@ -31,7 +31,16 @@
         "category": {
           "type": "string",
           "description": "The category of the task",
-          "enum": ["frontend", "backend", "database", "testing", "documentation", "infrastructure", "security", "functional"]
+          "enum": [
+            "frontend",
+            "backend",
+            "database",
+            "testing",
+            "documentation",
+            "infrastructure",
+            "security",
+            "functional"
+          ]
         },
         "description": {
           "type": "string",

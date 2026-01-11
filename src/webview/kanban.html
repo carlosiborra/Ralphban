@@ -1,20 +1,74 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}' https://cdn.jsdelivr.net; connect-src 'self' https://cdn.jsdelivr.net;">
-    <link href="${styleUri}" rel="stylesheet">
-    <title>Kanban Board</title>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';"
+    />
+    <link href="${styleUri}" rel="stylesheet" />
+    <title>Ralph's Kanban Board</title>
+  </head>
+  <body>
     <div class="header">
-        <h1 id="feature-title">Kanban Board</h1>
-        <p id="feature-description"></p>
-        <div class="search-filters">
-            <input type="text" id="search-input" placeholder="Search tasks..." class="search-input">
-            <select id="filter-category" class="filter-dropdown">
-                <option value="">All Categories</option>
+      <h1 id="feature-title">Ralph's Kanban Board</h1>
+      <p id="feature-description"></p>
+      <div class="search-filters">
+        <input type="text" id="search-input" placeholder="Search tasks..." class="search-input" />
+        <select id="filter-category" class="filter-dropdown">
+          <option value="">All Categories</option>
+          <option value="frontend">Frontend</option>
+          <option value="backend">Backend</option>
+          <option value="database">Database</option>
+          <option value="testing">Testing</option>
+          <option value="documentation">Documentation</option>
+          <option value="infrastructure">Infrastructure</option>
+          <option value="security">Security</option>
+          <option value="functional">Functional</option>
+        </select>
+        <select id="filter-priority" class="filter-dropdown">
+          <option value="">All Priorities</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+        <button id="clear-filters-btn" class="clear-filters-btn" style="display: none">
+          Clear
+        </button>
+      </div>
+      <div class="stats" id="stats-container"></div>
+    </div>
+    <div class="board" id="board">
+      <div class="column" id="pending">
+        <h2>Pending</h2>
+        <div class="task-list"></div>
+      </div>
+      <div class="column" id="in_progress">
+        <h2>In Progress</h2>
+        <div class="task-list"></div>
+      </div>
+      <div class="column" id="completed">
+        <h2>Completed</h2>
+        <div class="task-list"></div>
+      </div>
+      <div class="column" id="cancelled">
+        <h2>Cancelled</h2>
+        <div class="task-list"></div>
+      </div>
+    </div>
+
+    <!-- Task Form Modal -->
+    <div id="task-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <div class="modal-body-container">
+          <div id="modal-body"></div>
+          <form id="task-form" style="display: none">
+            <h2 id="form-title">Task</h2>
+            <div class="form-group">
+              <label for="task-category">Category *</label>
+              <select id="task-category" required>
                 <option value="frontend">Frontend</option>
                 <option value="backend">Backend</option>
                 <option value="database">Database</option>
@@ -23,107 +77,57 @@
                 <option value="infrastructure">Infrastructure</option>
                 <option value="security">Security</option>
                 <option value="functional">Functional</option>
-            </select>
-            <select id="filter-priority" class="filter-dropdown">
-                <option value="">All Priorities</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="task-priority">Priority</label>
+              <select id="task-priority">
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
-            </select>
-            <button id="clear-filters-btn" class="clear-filters-btn" style="display: none;">Clear</button>
-        </div>
-        <div class="stats" id="stats-container"></div>
-    </div>
-    <div class="board" id="board">
-        <div class="column" id="pending">
-            <h2>Pending</h2>
-            <div class="task-list"></div>
-        </div>
-        <div class="column" id="in_progress">
-            <h2>In Progress</h2>
-            <div class="task-list"></div>
-        </div>
-        <div class="column" id="completed">
-            <h2>Completed</h2>
-            <div class="task-list"></div>
-        </div>
-        <div class="column" id="cancelled">
-            <h2>Cancelled</h2>
-            <div class="task-list"></div>
-        </div>
-    </div>
-
-    <!-- Task Form Modal -->
-    <div id="task-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <div class="modal-body-container">
-                <div id="modal-body"></div>
-                <form id="task-form" style="display: none;">
-                    <h2 id="form-title">Task</h2>
-                    <div class="form-group">
-                        <label for="task-category">Category *</label>
-                        <select id="task-category" required>
-                            <option value="frontend">Frontend</option>
-                            <option value="backend">Backend</option>
-                            <option value="database">Database</option>
-                            <option value="testing">Testing</option>
-                            <option value="documentation">Documentation</option>
-                            <option value="infrastructure">Infrastructure</option>
-                            <option value="security">Security</option>
-                            <option value="functional">Functional</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="task-priority">Priority</label>
-                        <select id="task-priority">
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="task-status">Status</label>
-                        <select id="task-status">
-                            <option value="pending">Pending</option>
-                            <option value="in_progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="task-description">Description *</label>
-                        <textarea id="task-description" rows="3" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Steps</label>
-                        <div id="steps-container"></div>
-                        <button type="button" id="add-step-btn">+ Add Step</button>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" id="save-task-btn">Save Task</button>
-                        <button type="button" id="cancel-edit-btn">Cancel</button>
-                    </div>
-                </form>
+              </select>
             </div>
+            <div class="form-group">
+              <label for="task-status">Status</label>
+              <select id="task-status">
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="task-description">Description *</label>
+              <textarea id="task-description" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+              <label>Steps</label>
+              <div id="steps-container"></div>
+              <button type="button" id="add-step-btn">+ Add Step</button>
+            </div>
+            <div class="form-actions">
+              <button type="submit" id="save-task-btn">Save Task</button>
+              <button type="button" id="cancel-edit-btn">Cancel</button>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
 
     <!-- Task Card Template -->
     <template id="task-card-template">
-        <div class="task-card" draggable="true">
-            <div class="task-header">
-                <span class="task-category"></span>
-                <span class="task-priority"></span>
-            </div>
-            <div class="task-description"></div>
-            <div class="task-footer">
-                <span class="task-steps-count"></span>
-                <span class="task-dependencies-count"></span>
-            </div>
+      <div class="task-card" draggable="true">
+        <div class="task-header">
+          <span class="task-category"></span>
+          <span class="task-priority"></span>
         </div>
+        <div class="task-description"></div>
+        <div class="task-footer">
+          <span class="task-steps-count"></span>
+          <span class="task-dependencies-count"></span>
+        </div>
+      </div>
     </template>
-    <script nonce="${nonce}" src="https://cdn.jsdelivr.net/npm/marked@15.0.6/marked.min.js"></script>
     <script nonce="${nonce}" src="${scriptUri}"></script>
-</body>
+  </body>
 </html>

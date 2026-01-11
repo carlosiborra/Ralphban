@@ -1,6 +1,14 @@
-export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
+export type TaskStatus = "pending" | "in_progress" | "completed" | "cancelled";
 
-export type TaskCategory = 'frontend' | 'backend' | 'database' | 'testing' | 'documentation' | 'infrastructure' | 'security' | 'functional';
+export type TaskCategory =
+  | "frontend"
+  | "backend"
+  | "database"
+  | "testing"
+  | "documentation"
+  | "infrastructure"
+  | "security"
+  | "functional";
 
 export interface Task {
   id?: string;
