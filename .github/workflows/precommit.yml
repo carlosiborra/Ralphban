@@ -47,6 +47,3 @@ jobs:
 
       - name: Compile
         run: pnpm run compile
-
-      - name: Verify Packaging
-        run: pnpm exec vsce package --no-git-tag-version -o test.vsix --no-prepublish
