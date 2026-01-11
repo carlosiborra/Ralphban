@@ -29,6 +29,24 @@
   "author": "",
   "license": "ISC",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "kanban-explorer",
+          "title": "Kanban",
+          "icon": "$(layout-kanban)"
+        }
+      ]
+    },
+    "views": {
+      "kanban-explorer": [
+        {
+          "type": "webview",
+          "id": "kanbanBoard",
+          "name": "Kanban Board"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "ralphban.openKanbanBoard",

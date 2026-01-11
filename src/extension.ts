@@ -1,7 +1,14 @@
 import * as vscode from 'vscode';
+import { KanbanViewProvider } from './kanbanViewProvider';
 
-export function activate(_context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext) {
 	console.log('Ralphban extension is now active!');
+
+	const provider = new KanbanViewProvider(context.extensionUri);
+
+	context.subscriptions.push(
+		vscode.window.registerWebviewViewProvider(KanbanViewProvider.viewType, provider)
+	);
 }
 
 export function deactivate() {
