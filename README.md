@@ -43,20 +43,16 @@ You define tasks in a JSON file. Ralphban reads that file and renders it as a Ka
 Example `prd.json`:
 
 ```json
-{
-  "feature": "My Project",
-  "description": "High-level goal of the system",
-  "tasks": [
-    {
-      "category": "backend",
-      "description": "Design task execution loop",
-      "steps": ["Define task state transitions", "Handle retries and failures", "Persist progress"],
-      "status": "pending",
-      "priority": "high",
-      "passes": false
-    }
-  ]
-}
+[
+  {
+    "category": "backend",
+    "description": "Design task execution loop",
+    "steps": ["Define task state transitions", "Handle retries and failures", "Persist progress"],
+    "status": "pending",
+    "priority": "high",
+    "passes": false
+  }
+]
 ```
 
 Open the Ralphban panel and you get a board that reflects this structure immediately.
