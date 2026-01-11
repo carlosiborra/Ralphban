@@ -8,11 +8,10 @@
       content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';"
     />
     <link href="${styleUri}" rel="stylesheet" />
-    <title>Ralph's Kanban Board</title>
   </head>
   <body>
     <div class="header">
-      <h1 id="board-title">Ralphban</h1>
+      <h1 id="board-title">Ralphban: Ralph's Kanban</h1>
       <div class="search-filters">
         <input type="text" id="search-input" placeholder="Search tasks..." class="search-input" />
         <select id="filter-category" class="filter-dropdown">
@@ -28,85 +27,109 @@
         </select>
         <select id="filter-priority" class="filter-dropdown">
           <option value="">All Priorities</option>
+          <option value="none">None</option>
           <option value="low">Low</option>
           <option value="medium">Medium</option>
           <option value="high">High</option>
         </select>
-        <button id="clear-filters-btn" class="clear-filters-btn" style="display: none">
-          Clear
-        </button>
+        <button id="clear-filters-btn" class="clear-filters-btn" disabled>Clear</button>
       </div>
       <div class="stats" id="stats-container"></div>
     </div>
     <div class="board" id="board">
-      <div class="column" id="pending">
-        <h2>Pending</h2>
-        <div class="task-list"></div>
-      </div>
-      <div class="column" id="in_progress">
-        <h2>In Progress</h2>
-        <div class="task-list"></div>
-      </div>
-      <div class="column" id="completed">
-        <h2>Completed</h2>
-        <div class="task-list"></div>
-      </div>
-      <div class="column" id="cancelled">
-        <h2>Cancelled</h2>
-        <div class="task-list"></div>
-      </div>
+      <!-- Columns will be dynamically created based on task statuses -->
     </div>
 
     <!-- Task Form Modal -->
     <div id="task-modal" class="modal">
       <div class="modal-content">
-        <span class="close-button">&times;</span>
+        <span class="close-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+            <path
+              fill="currentColor"
+              d="m12 13.4l2.9 2.9q.275.275.7.275t.7-.275t.275-.7t-.275-.7L13.4 12l2.9-2.9q.275-.275.275-.7t-.275-.7t-.7-.275t-.7.275L12 10.6L9.1 7.7q-.275-.275-.7-.275t-.7.275t-.275.7t.275.7l2.9 2.9l-2.9 2.9q-.275.275-.275.7t.275.7t.7.275t.7-.275zm0 8.6q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8"
+            />
+          </svg>
+        </span>
         <div class="modal-body-container">
-          <div id="modal-body"></div>
           <form id="task-form" style="display: none">
             <h2 id="form-title">Task</h2>
-            <div class="form-group">
-              <label for="task-category">Category *</label>
-              <select id="task-category" required>
-                <option value="frontend">Frontend</option>
-                <option value="backend">Backend</option>
-                <option value="database">Database</option>
-                <option value="testing">Testing</option>
-                <option value="documentation">Documentation</option>
-                <option value="infrastructure">Infrastructure</option>
-                <option value="security">Security</option>
-                <option value="functional">Functional</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="task-priority">Priority</label>
-              <select id="task-priority">
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="task-status">Status</label>
-              <select id="task-status">
-                <option value="pending">Pending</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="task-description">Description *</label>
-              <textarea id="task-description" rows="3" required></textarea>
-            </div>
-            <div class="form-group">
-              <label>Steps</label>
-              <div id="steps-container"></div>
-              <button type="button" id="add-step-btn">+ Add Step</button>
+            <div class="form-scroll-area">
+              <div class="form-group">
+                <label for="task-category">Category *</label>
+                <select id="task-category" required>
+                  <option value="frontend">Frontend</option>
+                  <option value="backend">Backend</option>
+                  <option value="database">Database</option>
+                  <option value="testing">Testing</option>
+                  <option value="documentation">Documentation</option>
+                  <option value="infrastructure">Infrastructure</option>
+                  <option value="security">Security</option>
+                  <option value="functional">Functional</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="task-priority">Priority</label>
+                <select id="task-priority">
+                  <option value="none">None</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+              <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="task-passes" />
+                  <span>Mark as Completed (Passes)</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label for="task-status">Status (Optional)</label>
+                <select id="task-status">
+                  <option value="">Default (Pending)</option>
+                  <option value="pending">Pending</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="task-description">Description *</label>
+                <textarea id="task-description" rows="3" required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Steps</label>
+                <div id="steps-container"></div>
+                <button type="button" id="add-step-btn" class="add-secondary-btn">
+                  + Add Step
+                </button>
+              </div>
+              <div class="form-group">
+                <label>Dependencies</label>
+                <div id="dependencies-container"></div>
+                <button type="button" id="add-dependency-btn" class="add-secondary-btn">
+                  + Add Dependency
+                </button>
+              </div>
             </div>
             <div class="form-actions">
-              <button type="submit" id="save-task-btn">Save Task</button>
-              <button type="button" id="cancel-edit-btn">Cancel</button>
+              <div class="primary-actions">
+                <button type="submit" id="save-task-btn">Save Task</button>
+                <button type="button" id="cancel-edit-btn">Cancel</button>
+              </div>
+              <button
+                type="button"
+                id="form-delete-task-btn"
+                class="delete-icon-btn"
+                title="Delete Task"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                  <path
+                    fill="currentColor"
+                    d="M7 21q-.825 0-1.412-.587T5 19V6q-.425 0-.712-.288T4 5t.288-.712T5 4h4q0-.425.288-.712T10 3h4q.425 0 .713.288T15 4h4q.425 0 .713.288T20 5t-.288.713T19 6v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zm-7 11q.425 0 .713-.288T11 16V9q0-.425-.288-.712T10 8t-.712.288T9 9v7q0 .425.288.713T10 17m4 0q.425 0 .713-.288T15 16V9q0-.425-.288-.712T14 8t-.712.288T13 9v7q0 .425.288.713T14 17M7 6v13z"
+                  />
+                </svg>
+              </button>
             </div>
           </form>
         </div>
@@ -127,6 +150,6 @@
         </div>
       </div>
     </template>
-    <script nonce="${nonce}" src="${scriptUri}"></script>
+    <script nonce="${nonce}" type="module" src="${scriptUri}"></script>
   </body>
 </html>

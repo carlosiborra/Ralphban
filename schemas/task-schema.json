@@ -10,7 +10,7 @@
   "definitions": {
     "task": {
       "type": "object",
-      "required": ["category", "description", "steps", "passes"],
+      "required": ["category", "description", "steps"],
       "properties": {
         "category": {
           "type": "string",
@@ -54,12 +54,6 @@
         "passes": {
           "type": "boolean",
           "description": "Whether the task passes its criteria"
-        },
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the task",
-          "pattern": ".+",
-          "minLength": 1
         },
         "priority": {
           "type": "string",

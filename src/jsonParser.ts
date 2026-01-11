@@ -2,6 +2,14 @@ import Ajv, { type ValidateFunction } from "ajv";
 import * as vscode from "vscode";
 import type { TaskFile } from "./types";
 
+interface HasTasksProperty {
+  tasks: unknown;
+}
+
+function hasTasksProperty(obj: unknown): obj is HasTasksProperty {
+  return typeof obj === "object" && obj !== null && "tasks" in obj;
+}
+
 let schemaValidator: ValidateFunction | null = null;
 let schemaLoadPromise: Promise<ValidateFunction> | null = null;
 
@@ -61,7 +69,14 @@ export async function parseTaskFile(uri: vscode.Uri): Promise<TaskFile> {
     }
 
     const validator = await loadSchemaValidator();
-    const isValid = validator(jsonData);
+
+    // Support files where the tasks are wrapped in a 'tasks' property
+    let validationData = jsonData;
+    if (hasTasksProperty(jsonData)) {
+      validationData = jsonData.tasks;
+    }
+
+    const isValid = validator(validationData);
 
     if (!isValid) {
       const errorMessages = validator.errors?.map((err) => {
@@ -73,7 +88,7 @@ export async function parseTaskFile(uri: vscode.Uri): Promise<TaskFile> {
       throw new ParseError(`JSON validation failed for file: ${uri.fsPath}`, errorMessages);
     }
 
-    const taskFile = jsonData as TaskFile;
+    const taskFile = validationData as TaskFile;
     return taskFile;
   } catch (error) {
     if (error instanceof ParseError) {
@@ -91,7 +106,14 @@ export async function validateTaskFile(
 ): Promise<{ valid: boolean; errors?: string[] }> {
   try {
     const validator = await loadSchemaValidator();
-    const isValid = validator(jsonData);
+
+    // Support files where the tasks are wrapped in a 'tasks' property
+    let validationData = jsonData;
+    if (hasTasksProperty(jsonData)) {
+      validationData = jsonData.tasks;
+    }
+
+    const isValid = validator(validationData);
 
     if (!isValid) {
       const errorMessages = validator.errors?.map((err) => {

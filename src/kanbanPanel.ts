@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { TaskFileWatcher } from "./fileWatcher";
 import { ParseError, parseTaskFile } from "./jsonParser";
 import { handleWebviewMessage } from "./messageHandler";
+import { injectWebviewAssets } from "./utils/webview";
 
 export class KanbanPanel {
   public static readonly viewType = "ralphban.kanbanPanel";
@@ -144,34 +145,8 @@ export class KanbanPanel {
     const scriptUri = webview.asWebviewUri(scriptPath);
     const styleUri = webview.asWebviewUri(stylePath);
 
-    let html = fs.readFileSync(htmlPath, "utf8");
+    const html = fs.readFileSync(htmlPath, "utf8");
 
-    const nonce = getNonce();
-
-    html = html.replace(/\${webview.cspSource}/g, webview.cspSource);
-    html = html.replace(/\${nonce}/g, nonce);
-    html = html.replace(/\${styleUri}/g, styleUri.toString());
-    html = html.replace(/\${scriptUri}/g, scriptUri.toString());
-
-    if (!html.includes(styleUri.toString())) {
-      html = html.replace("</head>", `    <link href="${styleUri}" rel="stylesheet">\n</head>`);
-    }
-    if (!html.includes(scriptUri.toString())) {
-      html = html.replace(
-        "</body>",
-        `    <script nonce="${nonce}" src="${scriptUri}"></script>\n</body>`
-      );
-    }
-
-    return html;
+    return injectWebviewAssets(html, webview, [styleUri], scriptUri);
   }
-}
-
-function getNonce() {
-  let text = "";
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
 }

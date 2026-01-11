@@ -31,10 +31,13 @@ Your JSON stays your JSON. Ralphban is just a lens.
 
 - Visual Kanban board generated directly from JSON task files
 - Drag tasks between states to update status
+- Task completion is final (completed tasks cannot move back to pending)
 - Edit tasks inline without breaking structure
 - Real-time sync between the board and the file
 - Multiple boards per workspace
 - Automatic discovery of task files via patterns
+- Progress tracking with percentage counter
+- Filter and search tasks by category, priority, or description
 
 ## How It Works
 
@@ -50,7 +53,7 @@ Example `prd.json`:
     "steps": ["Define task state transitions", "Handle retries and failures", "Persist progress"],
     "status": "pending",
     "priority": "high",
-    "passes": false
+    "passes": null
   }
 ]
 ```
@@ -74,7 +77,7 @@ The base structure focuses on categories, steps, and binary passes:
     "Click the 'New Chat' button",
     "Verify a new conversation is created"
   ],
-  "passes": false
+  "passes": null
 }
 ```
 
@@ -84,22 +87,29 @@ We extend this schema with three critical keys that enable the Kanban visualizat
 
 1.  **`status`**: Replaces binary "passes" with a granular state (`pending`, `in_progress`, `completed`, `cancelled`). This is what determines the task's column on the board.
 2.  **`priority`**: Adds a reasoning signal (`low`, `medium`, `high`) to help the LLM decide which tasks in a graph to tackle first.
-3.  **`dependencies`**: A list of task descriptions/IDs that this task depends on. This allows the visualization of task graphs and helps agents handle conditional executions.
+3.  **`dependencies`**: A list of task descriptions that this task depends on. This allows the visualization of task graphs and helps agents handle conditional executions.
+
+The `passes` field can be:
+
+- `true`: Task is explicitly completed (overrides `status`)
+- `false`: Task is explicitly failed (overrides `status`)
+- `null`/`undefined`: Use `status` to determine completion
 
 ### Full Task Shape
 
 ```json
 {
-  "id": "optional-id",
   "category": "backend",
   "description": "Design task execution loop",
   "status": "pending",
   "priority": "high",
   "steps": ["Define task state transitions", "Handle retries and failures"],
   "dependencies": ["Setup database schema"],
-  "passes": false
+  "passes": null
 }
 ```
+
+> **Note**: Tasks are uniquely identified by `description`. The `passes` field is nullable - `null` or `undefined` means the completion state is determined by `status` alone.
 
 ## Configuration
 
@@ -153,13 +163,13 @@ Extension Host (Backend)          Webview (Frontend)
 │   ├─ Commands       │          │ kanban.css      │
 │   └─ Event handlers │◄────────►│ kanban.js       │
 │                     │          │                 │
-│ messageHandler.ts   │  Message │ - Drag & drop   │
-│   ├─ CRUD ops       │  Passing │ - Filters       │
-│   └─ File I/O       │◄────────►│ - Forms         │
-│                     │          │ - Markdown      │
-│ fileScanner.ts      │          └─────────────────┘
-│ jsonParser.ts       │
-│ fileWriter.ts       │
+│ messageHandler.ts   │  Message │ dom.js          │ DOM element refs
+│   ├─ CRUD ops       │  Passing │ state.js        │ State management
+│   └─ File I/O       │◄────────►│ task-utils.js   │ Task utilities
+│                     │          │ renderer.js     │ Rendering
+│ fileScanner.ts      │          │ form.js         │ Forms
+│ jsonParser.ts       │          │ events.js       │ Event listeners
+│ fileWriter.ts       │          └─────────────────┘
 │ fileWatcher.ts      │
 └─────────────────────┘
          │
@@ -172,13 +182,19 @@ Extension Host (Backend)          Webview (Frontend)
 
 ### Key Files
 
-| File                       | Purpose                                   |
-| :------------------------- | :---------------------------------------- |
-| `src/extension.ts`         | Entry point, command registration         |
-| `src/types.ts`             | TypeScript interfaces and data structures |
-| `src/messageHandler.ts`    | Business logic and CRUD operations        |
-| `src/webview/`             | Frontend UI (HTML, CSS, JS)               |
-| `schemas/task-schema.json` | JSON Schema for task validation           |
+| File                        | Purpose                                   |
+| :-------------------------- | :---------------------------------------- |
+| `src/extension.ts`          | Entry point, command registration         |
+| `src/types.ts`              | TypeScript interfaces and data structures |
+| `src/messageHandler.ts`     | Business logic and CRUD operations        |
+| `src/webview/`              | Frontend UI modules                       |
+| `src/webview/dom.js`        | DOM element references and exports        |
+| `src/webview/state.js`      | State management (tasks, filters)         |
+| `src/webview/task-utils.js` | Task utilities and filtering              |
+| `src/webview/renderer.js`   | Board rendering and task cards            |
+| `src/webview/form.js`       | Task form handling and submission         |
+| `src/webview/events.js`     | Event listeners and message handling      |
+| `schemas/task-schema.json`  | JSON Schema for task validation           |
 
 ### Troubleshooting
 

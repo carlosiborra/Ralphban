@@ -28,14 +28,14 @@ export class TaskFileWatcher {
 
   private handleDidChange(uri: vscode.Uri): void {
     const uriString = uri.toString();
-
-    if (this.debounceTimers.has(uriString)) {
-      clearTimeout(this.debounceTimers.get(uriString)!);
+    const existingTimer = this.debounceTimers.get(uriString);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
     }
 
     const timer = setTimeout(() => {
-      this.events.onChange(uri);
       this.debounceTimers.delete(uriString);
+      this.events.onChange(uri);
     }, this.DEBOUNCE_MS);
 
     this.debounceTimers.set(uriString, timer);
@@ -54,8 +54,4 @@ export class TaskFileWatcher {
     this.debounceTimers.clear();
     this.disposable.dispose();
   }
-}
-
-export function createFileWatcher(uri: vscode.Uri, events: FileWatcherEvents): TaskFileWatcher {
-  return new TaskFileWatcher(uri, events);
 }
