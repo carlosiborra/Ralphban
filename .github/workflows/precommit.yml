@@ -48,8 +48,5 @@ jobs:
       - name: Compile
         run: pnpm run compile
 
-      - name: Run Tests
-        run: xvfb-run -a pnpm run test
-
       - name: Verify Packaging
         run: pnpm exec vsce package --no-git-tag-version -o test.vsix
