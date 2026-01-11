@@ -24,7 +24,7 @@ If something feels awkward when you use the extension, that’s probably a good 
 Fork the repo on GitHub, then clone your fork:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ralphban.git
+git clone https://github.com/carlosiborra/ralphban.git
 cd ralphban
 ```
 
