@@ -21,11 +21,7 @@ export interface Task {
   priority?: string;
 }
 
-export interface TaskFile {
-  feature?: string;
-  description?: string;
-  tasks: Task[];
-}
+export type TaskFile = Task[];
 
 export interface KanbanColumn {
   id: TaskStatus;

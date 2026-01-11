@@ -53,17 +53,11 @@ export async function findTaskFiles(): Promise<vscode.Uri[]> {
 }
 
 function isValidTaskFile(data: unknown): data is TaskFile {
-  if (!data || typeof data !== "object") {
+  if (!Array.isArray(data)) {
     return false;
   }
 
-  const obj = data as Record<string, unknown>;
-
-  if (!Array.isArray(obj.tasks)) {
-    return false;
-  }
-
-  return obj.tasks.every((task): task is Task => {
+  return data.every((task): task is Task => {
     if (!task || typeof task !== "object") {
       return false;
     }

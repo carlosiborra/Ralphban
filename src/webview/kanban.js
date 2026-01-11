@@ -2,8 +2,6 @@
   const vscode = acquireVsCodeApi();
 
   const board = document.getElementById("board");
-  const featureTitle = document.getElementById("feature-title");
-  const featureDescription = document.getElementById("feature-description");
   const statsContainer = document.getElementById("stats-container");
   const taskCardTemplate = document.getElementById("task-card-template");
   const searchInput = document.getElementById("search-input");
@@ -70,9 +68,13 @@
   });
 
   function renderBoard(data) {
-    currentTasks = data.tasks;
-    featureTitle.textContent = data.feature || "PRD";
-    featureDescription.textContent = data.description || "";
+    if (Array.isArray(data)) {
+      currentTasks = data;
+    } else if (data && Array.isArray(data.tasks)) {
+      currentTasks = data.tasks;
+    } else {
+      currentTasks = [];
+    }
 
     const filteredTasks = getFilteredTasks(currentTasks);
 
@@ -130,11 +132,7 @@
   }
 
   function applyFilters() {
-    renderBoard({
-      tasks: currentTasks,
-      feature: featureTitle.textContent,
-      description: featureDescription.textContent,
-    });
+    renderBoard(currentTasks);
   }
 
   function getFilteredTasks(tasks) {
@@ -210,11 +208,7 @@
       if (task && (task.status || "pending") !== newStatus) {
         // Optimistic UI update
         task.status = newStatus;
-        renderBoard({
-          tasks: currentTasks,
-          feature: featureTitle.textContent,
-          description: featureDescription.textContent,
-        });
+        renderBoard(currentTasks);
 
         // Notify extension
         vscode.postMessage({

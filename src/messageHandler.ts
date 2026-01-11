@@ -79,19 +79,19 @@ async function updateTaskStatus(
   taskId: string,
   newStatus: "pending" | "in_progress" | "completed" | "cancelled"
 ): Promise<void> {
-  const taskFile = await parseTaskFile(uri);
-  const taskIndex = taskFile.tasks.findIndex((t) => (t.id || t.description) === taskId);
+  const tasks = await parseTaskFile(uri);
+  const taskIndex = tasks.findIndex((t) => (t.id || t.description) === taskId);
 
-  if (taskIndex !== -1 && taskFile.tasks[taskIndex]) {
-    taskFile.tasks[taskIndex].status = newStatus;
-    await writeTaskFile(uri, taskFile.tasks);
+  if (taskIndex !== -1 && tasks[taskIndex]) {
+    tasks[taskIndex].status = newStatus;
+    await writeTaskFile(uri, tasks);
   } else {
     throw new Error(`Task with ID ${taskId} not found`);
   }
 }
 
 async function createTask(uri: vscode.Uri, task: Task): Promise<void> {
-  const taskFile = await parseTaskFile(uri);
+  const tasks = await parseTaskFile(uri);
 
   if (!task.id) {
     task.id = generateTaskId(task.description);
@@ -101,49 +101,49 @@ async function createTask(uri: vscode.Uri, task: Task): Promise<void> {
     task.status = "pending";
   }
 
-  taskFile.tasks.push(task);
-  await writeTaskFile(uri, taskFile.tasks);
+  tasks.push(task);
+  await writeTaskFile(uri, tasks);
 }
 
 async function updateTask(uri: vscode.Uri, updatedTask: Task): Promise<void> {
-  const taskFile = await parseTaskFile(uri);
+  const tasks = await parseTaskFile(uri);
   const taskId = updatedTask.id || updatedTask.description;
 
   if (!taskId) {
     throw new Error("Task must have either an id or description");
   }
 
-  const taskIndex = taskFile.tasks.findIndex((t) => (t.id || t.description) === taskId);
+  const taskIndex = tasks.findIndex((t) => (t.id || t.description) === taskId);
 
   if (taskIndex === -1) {
     throw new Error(`Task with ID or description "${taskId}" not found`);
   }
 
-  taskFile.tasks[taskIndex] = updatedTask;
-  await writeTaskFile(uri, taskFile.tasks);
+  tasks[taskIndex] = updatedTask;
+  await writeTaskFile(uri, tasks);
 }
 
 async function deleteTask(uri: vscode.Uri, taskId: string): Promise<void> {
-  const taskFile = await parseTaskFile(uri);
+  const tasks = await parseTaskFile(uri);
 
-  const taskIndex = taskFile.tasks.findIndex((t) => (t.id || t.description) === taskId);
+  const taskIndex = tasks.findIndex((t) => (t.id || t.description) === taskId);
 
   if (taskIndex === -1) {
     throw new Error(`Task with ID or description "${taskId}" not found`);
   }
 
-  taskFile.tasks.splice(taskIndex, 1);
-  await writeTaskFile(uri, taskFile.tasks);
+  tasks.splice(taskIndex, 1);
+  await writeTaskFile(uri, tasks);
 }
 
 async function refreshWebview(
   taskFileUri: vscode.Uri,
   webviewHost: vscode.WebviewView | vscode.WebviewPanel
 ): Promise<void> {
-  const taskFile = await parseTaskFile(taskFileUri);
+  const tasks = await parseTaskFile(taskFileUri);
   webviewHost.webview.postMessage({
     type: "update",
-    data: taskFile,
+    data: { tasks },
   });
 }
 
