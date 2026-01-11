@@ -10,13 +10,6 @@ So I built Ralphban.
 
 Ralphban is a VS Code extension that turns Ralph-style task files into a visual Kanban board. It is not a project manager. It is not Jira. It is a debugging and thinking tool for people building LLM-driven systems.
 
-This extension also follows the task and agent structure described in Anthropic’s excellent write-up on long-running agents:
-[Effective Harnesses for Long-Running Agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents). But with some additional keys:
-
-- `status`: The current status of the task (more specific than just `passed`)
-- `priority`: The priority of the task for helping the LLM reason about the task graph
-- `dependencies`: The tasks that this task depends on in case of conditional executions
-
 If you are building LLM workflows, task harnesses, or agent loops, this is meant to live next to your code.
 
 ## What Ralphban Is For
@@ -70,31 +63,32 @@ Open the Ralphban panel and you get a board that reflects this structure immedia
 
 ## Task Schema
 
-The schema is intentionally boring and explicit.
+Ralphban follows the task structure described in Anthropic's [Effective Harnesses for Long-Running Agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents), but adds specific keys to improve visual state tracking and LLM reasoning.
 
-### Status
+### The Original Anthropic Structure
 
-- `pending`
-- `in_progress`
-- `completed`
-- `cancelled`
+The base structure focuses on categories, steps, and binary passes:
 
-### Priority
+```json
+{
+  "category": "functional",
+  "description": "New chat button creates a fresh conversation",
+  "steps": [
+    "Navigate to main interface",
+    "Click the 'New Chat' button",
+    "Verify a new conversation is created"
+  ],
+  "passes": false
+}
+```
 
-- `low`
-- `medium`
-- `high`
+### Ralphban Extensions
 
-### Categories
+We extend this schema with three critical keys that enable the Kanban visualization and complex agent workflows:
 
-- `frontend`
-- `backend`
-- `database`
-- `testing`
-- `documentation`
-- `infrastructure`
-- `security`
-- `functional`
+1.  **`status`**: Replaces binary "passes" with a granular state (`pending`, `in_progress`, `completed`, `cancelled`). This is what determines the task's column on the board.
+2.  **`priority`**: Adds a reasoning signal (`low`, `medium`, `high`) to help the LLM decide which tasks in a graph to tackle first.
+3.  **`dependencies`**: A list of task descriptions/IDs that this task depends on. This allows the visualization of task graphs and helps agents handle conditional executions.
 
 ### Full Task Shape
 
@@ -102,16 +96,14 @@ The schema is intentionally boring and explicit.
 {
   "id": "optional-id",
   "category": "backend",
-  "description": "Task description",
+  "description": "Design task execution loop",
   "status": "pending",
   "priority": "high",
-  "steps": ["Concrete step 1", "Concrete step 2"],
-  "dependencies": ["Another task description"],
+  "steps": ["Define task state transitions", "Handle retries and failures"],
+  "dependencies": ["Setup database schema"],
   "passes": false
 }
 ```
-
-This structure maps cleanly to how LLM agents reason about work: explicit steps, explicit state, explicit dependencies.
 
 ## Configuration
 
