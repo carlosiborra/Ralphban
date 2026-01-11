@@ -133,26 +133,76 @@ When something stalls, loops, or fails, you see it immediately.
 
 ## Development
 
-Requirements:
+### Prerequisites
 
 - Node.js 18+
 - pnpm
 - VS Code 1.108+
 
-Local setup:
+### Quick Start
 
-```bash
-git clone https://github.com/carlosiborra/ralphban.git
-cd ralphban
-pnpm install
+1. **Installation**:
+
+   ```bash
+   git clone https://github.com/carlosiborra/ralphban.git
+   cd ralphban
+   pnpm install
+   pnpm run compile
+   ```
+
+2. **Run Extension**:
+   - Open the project in VS Code: `code .`
+   - Press `F5` (starts Extension Development Host).
+   - In the new window, create a file named `test.prd.json` with some tasks.
+   - Click the **Ralphban** icon in the sidebar to see your board!
+
+### Architecture at a Glance
+
+```
+Extension Host (Backend)          Webview (Frontend)
+┌─────────────────────┐          ┌─────────────────┐
+│ extension.ts        │          │ kanban.html     │
+│   ├─ Commands       │          │ kanban.css      │
+│   └─ Event handlers │◄────────►│ kanban.js       │
+│                     │          │                 │
+│ messageHandler.ts   │  Message │ - Drag & drop   │
+│   ├─ CRUD ops       │  Passing │ - Filters       │
+│   └─ File I/O       │◄────────►│ - Forms         │
+│                     │          │ - Markdown      │
+│ fileScanner.ts      │          └─────────────────┘
+│ jsonParser.ts       │
+│ fileWriter.ts       │
+│ fileWatcher.ts      │
+└─────────────────────┘
+         │
+         ▼
+  ┌──────────────┐
+  │ prd.json     │
+  │ tasks.json   │
+  └──────────────┘
 ```
 
-Run locally:
+### Key Files
 
-- Open the project in VS Code
-- Press F5
-- Create a test task file
-- Open the Ralphban panel
+| File                       | Purpose                                   |
+| :------------------------- | :---------------------------------------- |
+| `src/extension.ts`         | Entry point, command registration         |
+| `src/types.ts`             | TypeScript interfaces and data structures |
+| `src/messageHandler.ts`    | Business logic and CRUD operations        |
+| `src/webview/`             | Frontend UI (HTML, CSS, JS)               |
+| `schemas/task-schema.json` | JSON Schema for task validation           |
+
+### Troubleshooting
+
+- **Extension doesn't activate**: Check the "Ralphban" channel in the Output view (`View → Output`).
+- **Webview is blank**: Open "Developer: Open Webview Developer Tools" from the Command Palette (`Cmd+Shift+P`) to check for frontend errors.
+- **Build issues**: Ensure you've run `pnpm install` and `pnpm run compile`.
+
+## Documentation Index
+
+1. **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute to Ralphban
+2. **[CHANGELOG.md](CHANGELOG.md)** - Version history and recent changes
+3. **[LICENSE](LICENSE)** - MIT License information
 
 ## Philosophy
 
