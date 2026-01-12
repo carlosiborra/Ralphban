@@ -11,13 +11,12 @@ export type TaskCategory =
   | "functional";
 
 export interface Task {
-  id?: string;
   description: string;
   status?: TaskStatus;
   category: TaskCategory;
   steps: string[];
   dependencies?: string[];
-  passes: boolean;
+  passes?: boolean | null;
   priority?: string;
 }
 

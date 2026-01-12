@@ -7,137 +7,94 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';"
     />
-    <style>
-      body {
-        padding: 10px;
-        color: var(--vscode-foreground);
-        font-family: var(--vscode-font-family);
-      }
-      .container {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      .board-item {
-        padding: 8px;
-        border: 1px solid var(--vscode-panel-border);
-        border-radius: 4px;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background-color: var(--vscode-list-inactiveSelectionBackground);
-      }
-      .board-item:hover {
-        background-color: var(--vscode-list-hoverBackground);
-      }
-      .board-info {
-        display: flex;
-        flex-direction: column;
-      }
-      .board-name {
-        font-weight: bold;
-      }
-      .board-path {
-        font-size: 0.8em;
-        color: var(--vscode-descriptionForeground);
-      }
-      button {
-        background-color: var(--vscode-button-background);
-        color: var(--vscode-button-foreground);
-        border: none;
-        padding: 6px 12px;
-        border-radius: 2px;
-        cursor: pointer;
-        width: 100%;
-      }
-      button:hover {
-        background-color: var(--vscode-button-hoverBackground);
-      }
-      .empty-state {
-        text-align: center;
-        color: var(--vscode-descriptionForeground);
-        padding: 20px 0;
-      }
-    </style>
+    <link href="${styleUri}" rel="stylesheet" />
   </head>
   <body>
-    <div id="content" class="container">
+    <div class="header">
+      <h1>Ralphban: Select Board</h1>
+      <div class="search-filters">
+        <input type="text" id="board-search" placeholder="Search boards..." class="search-input" />
+      </div>
+    </div>
+    <div id="content" class="item-list">
       <div class="empty-state">Scanning workspace...</div>
     </div>
 
     <script nonce="${nonce}">
       const vscode = acquireVsCodeApi();
+      let allBoards = [];
 
       window.addEventListener("message", (event) => {
         const message = event.data;
         switch (message.type) {
           case "list":
-            renderList(message.boards);
+            allBoards = message.boards;
+            renderList(allBoards);
             break;
         }
+      });
+
+      const searchInput = document.getElementById("board-search");
+      searchInput.addEventListener("input", (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = allBoards.filter(
+          (board) =>
+            board.name.toLowerCase().includes(query) || board.path.toLowerCase().includes(query)
+        );
+        renderList(filtered);
       });
 
       function renderList(boards) {
         const container = document.getElementById("content");
         container.innerHTML = "";
 
+        if (allBoards.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty-state";
+
+          const text = document.createElement("div");
+          text.textContent = "No Kanban boards found in workspace.";
+          empty.appendChild(text);
+
+          const createBtn = document.createElement("button");
+          createBtn.className = "primary-button";
+          createBtn.textContent = "Create New Board";
+          createBtn.onclick = () => vscode.postMessage({ type: "create" });
+          empty.appendChild(createBtn);
+
+          container.appendChild(empty);
+          return;
+        }
+
         if (boards.length === 0) {
           const empty = document.createElement("div");
           empty.className = "empty-state";
-          empty.textContent = "No Kanban boards found in workspace.";
+          empty.textContent = "No board matches your search.";
           container.appendChild(empty);
-
-          const createBtn = document.createElement("button");
-          createBtn.textContent = "Create New Board";
-          createBtn.onclick = () => vscode.postMessage({ type: "create" });
-          container.appendChild(createBtn);
           return;
         }
 
-        if (boards.length === 1) {
-          const board = boards[0];
-          const openBtn = document.createElement("button");
-          openBtn.textContent = `Open Kanban (${board.name})`;
-          openBtn.onclick = () => vscode.postMessage({ type: "open", uri: board.uri });
-          container.appendChild(openBtn);
-
-          const createBtn = document.createElement("button");
-          createBtn.style.marginTop = "12px";
-          createBtn.style.backgroundColor = "transparent";
-          createBtn.style.border = "1px solid var(--vscode-button-background)";
-          createBtn.style.color = "var(--vscode-button-background)";
-          createBtn.textContent = "Create Another Board";
-          createBtn.onclick = () => vscode.postMessage({ type: "create" });
-          container.appendChild(createBtn);
-          return;
-        }
-
-        // Several boards: List them
+        // List boards as stylish items
         boards.forEach((board) => {
-          const item = document.createElement("div");
-          item.className = "board-item";
-          item.onclick = () => vscode.postMessage({ type: "open", uri: board.uri });
-
-          const info = document.createElement("div");
-          info.className = "board-info";
+          const btn = document.createElement("button");
+          btn.className = "list-item";
 
           const name = document.createElement("div");
-          name.className = "board-name";
+          name.className = "list-item-title";
           name.textContent = board.name;
 
           const path = document.createElement("div");
-          path.className = "board-path";
+          path.className = "list-item-subtitle";
           path.textContent = board.path;
 
-          info.appendChild(name);
-          info.appendChild(path);
-          item.appendChild(info);
-          container.appendChild(item);
+          btn.appendChild(name);
+          btn.appendChild(path);
+          btn.onclick = () => vscode.postMessage({ type: "open", uri: board.uri });
+          container.appendChild(btn);
         });
 
         const createBtn = document.createElement("button");
-        createBtn.style.marginTop = "10px";
+        createBtn.className = "secondary-button";
         createBtn.textContent = "+ Create New Board";
         createBtn.onclick = () => vscode.postMessage({ type: "create" });
         container.appendChild(createBtn);

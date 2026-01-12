@@ -1,15 +1,62 @@
 import * as vscode from "vscode";
 import { writeTaskFile } from "./fileWriter";
 import { parseTaskFile } from "./jsonParser";
-import type { Task } from "./types";
+import type { Task, TaskStatus } from "./types";
 
-export interface WebviewMessage {
+interface BaseMessage {
   type: string;
-  data?: any;
-  taskId?: string;
-  newStatus?: string;
-  task?: Task;
 }
+
+interface UpdateTaskStatus extends BaseMessage {
+  type: "updateTaskStatus";
+  taskId: string;
+  newStatus: TaskStatus;
+  passes?: boolean;
+}
+
+interface CreateTask extends BaseMessage {
+  type: "createTask";
+  task: Task;
+}
+
+interface UpdateTask extends BaseMessage {
+  type: "updateTask";
+  task: Task & { originalDescription?: string };
+}
+
+interface DeleteTask extends BaseMessage {
+  type: "deleteTask";
+  taskId: string;
+}
+
+interface TaskUpdated extends BaseMessage {
+  type: "taskUpdated";
+  task: Task & { originalDescription?: string };
+}
+
+interface RefreshTasks extends BaseMessage {
+  type: "refreshTasks";
+}
+
+interface InfoMessage extends BaseMessage {
+  type: "onInfo";
+  data: string;
+}
+
+interface ErrorMessage extends BaseMessage {
+  type: "onError";
+  data: string;
+}
+
+export type WebviewMessage =
+  | UpdateTaskStatus
+  | CreateTask
+  | UpdateTask
+  | DeleteTask
+  | TaskUpdated
+  | RefreshTasks
+  | InfoMessage
+  | ErrorMessage;
 
 export async function handleWebviewMessage(
   message: WebviewMessage,
@@ -19,35 +66,33 @@ export async function handleWebviewMessage(
   try {
     switch (message.type) {
       case "updateTaskStatus":
-        if (message.taskId && message.newStatus) {
-          await updateTaskStatus(taskFileUri, message.taskId, message.newStatus as any);
+        await updateTaskStatus(taskFileUri, message.taskId, message.newStatus, message.passes);
+        if (webviewHost) {
+          await refreshWebview(taskFileUri, webviewHost);
         }
         break;
 
       case "createTask":
-        if (message.task) {
-          await createTask(taskFileUri, message.task);
-          if (webviewHost) {
-            await refreshWebview(taskFileUri, webviewHost);
-          }
+        await createTask(taskFileUri, message.task);
+        if (webviewHost) {
+          await refreshWebview(taskFileUri, webviewHost);
         }
         break;
 
       case "updateTask":
-        if (message.task) {
-          await updateTask(taskFileUri, message.task);
-          if (webviewHost) {
-            await refreshWebview(taskFileUri, webviewHost);
-          }
+        await updateTask(taskFileUri, message.task);
+        if (webviewHost) {
+          webviewHost.webview.postMessage({
+            type: "taskUpdated",
+            task: message.task,
+          });
         }
         break;
 
       case "deleteTask":
-        if (message.taskId) {
-          await deleteTask(taskFileUri, message.taskId);
-          if (webviewHost) {
-            await refreshWebview(taskFileUri, webviewHost);
-          }
+        await deleteTask(taskFileUri, message.taskId);
+        if (webviewHost) {
+          await refreshWebview(taskFileUri, webviewHost);
         }
         break;
 
@@ -64,9 +109,6 @@ export async function handleWebviewMessage(
       case "onError":
         vscode.window.showErrorMessage(message.data);
         break;
-
-      default:
-        console.warn(`Unknown message type: ${message.type}`);
     }
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
@@ -76,26 +118,24 @@ export async function handleWebviewMessage(
 
 async function updateTaskStatus(
   uri: vscode.Uri,
-  taskId: string,
-  newStatus: "pending" | "in_progress" | "completed" | "cancelled"
+  taskDescription: string,
+  newStatus: TaskStatus,
+  passes?: boolean
 ): Promise<void> {
   const tasks = await parseTaskFile(uri);
-  const taskIndex = tasks.findIndex((t) => (t.id || t.description) === taskId);
+  const taskIndex = tasks.findIndex((t) => t.description === taskDescription);
 
   if (taskIndex !== -1 && tasks[taskIndex]) {
     tasks[taskIndex].status = newStatus;
+    tasks[taskIndex].passes = passes ?? null;
     await writeTaskFile(uri, tasks);
   } else {
-    throw new Error(`Task with ID ${taskId} not found`);
+    throw new Error(`Task "${taskDescription}" not found`);
   }
 }
 
 async function createTask(uri: vscode.Uri, task: Task): Promise<void> {
   const tasks = await parseTaskFile(uri);
-
-  if (!task.id) {
-    task.id = generateTaskId(task.description);
-  }
 
   if (!task.status) {
     task.status = "pending";
@@ -105,31 +145,36 @@ async function createTask(uri: vscode.Uri, task: Task): Promise<void> {
   await writeTaskFile(uri, tasks);
 }
 
-async function updateTask(uri: vscode.Uri, updatedTask: Task): Promise<void> {
+async function updateTask(
+  uri: vscode.Uri,
+  updatedTask: Task & { originalDescription?: string }
+): Promise<void> {
   const tasks = await parseTaskFile(uri);
-  const taskId = updatedTask.id || updatedTask.description;
 
-  if (!taskId) {
-    throw new Error("Task must have either an id or description");
+  const taskDescription = updatedTask.description;
+  const originalDescription = updatedTask.originalDescription || taskDescription;
+
+  if (!taskDescription) {
+    throw new Error("Task must have a description");
   }
 
-  const taskIndex = tasks.findIndex((t) => (t.id || t.description) === taskId);
+  const taskIndex = tasks.findIndex((t) => t.description === originalDescription);
 
   if (taskIndex === -1) {
-    throw new Error(`Task with ID or description "${taskId}" not found`);
+    throw new Error(`Task "${originalDescription}" not found`);
   }
 
   tasks[taskIndex] = updatedTask;
   await writeTaskFile(uri, tasks);
 }
 
-async function deleteTask(uri: vscode.Uri, taskId: string): Promise<void> {
+async function deleteTask(uri: vscode.Uri, taskDescription: string): Promise<void> {
   const tasks = await parseTaskFile(uri);
 
-  const taskIndex = tasks.findIndex((t) => (t.id || t.description) === taskId);
+  const taskIndex = tasks.findIndex((t) => t.description === taskDescription);
 
   if (taskIndex === -1) {
-    throw new Error(`Task with ID or description "${taskId}" not found`);
+    throw new Error(`Task "${taskDescription}" not found`);
   }
 
   tasks.splice(taskIndex, 1);
@@ -145,13 +190,4 @@ async function refreshWebview(
     type: "update",
     data: { tasks },
   });
-}
-
-function generateTaskId(description: string): string {
-  const timestamp = Date.now();
-  const sanitized = description
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-  return `${sanitized}-${timestamp}`;
 }

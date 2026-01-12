@@ -6,9 +6,9 @@ import { KanbanPanel } from "./kanbanPanel";
 import { KanbanViewProvider } from "./kanbanViewProvider";
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log("Ralphban extension is now active!");
   const output = vscode.window.createOutputChannel("Ralphban");
   context.subscriptions.push(output);
+  output.appendLine("Ralphban extension is now active!");
 
   const provider = new KanbanViewProvider(context.extensionUri);
   context.subscriptions.push(
@@ -92,6 +92,30 @@ export function activate(context: vscode.ExtensionContext) {
     })
   );
 
+  context.subscriptions.push(
+    vscode.commands.registerCommand("ralphban.forceReopenBoard", async (uri?: vscode.Uri) => {
+      let targetUri = uri;
+
+      if (!targetUri) {
+        const activeEditor = vscode.window.activeTextEditor;
+        if (activeEditor && isTaskFileUri(activeEditor.document.uri)) {
+          targetUri = activeEditor.document.uri;
+        } else {
+          targetUri = await findTaskFileByName("prd.json");
+        }
+      }
+
+      if (!targetUri) {
+        return;
+      }
+
+      KanbanPanel.closeCurrentPanel();
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await KanbanPanel.createOrShow(context.extensionUri, targetUri);
+    })
+  );
+
   const updateContext = () => {
     const activeEditor = vscode.window.activeTextEditor;
     if (activeEditor && isTaskFileUri(activeEditor.document.uri)) {
@@ -130,5 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
-  console.log("Ralphban extension is now deactivated!");
+  vscode.window
+    .createOutputChannel("Ralphban")
+    .appendLine("Ralphban extension is now deactivated!");
 }

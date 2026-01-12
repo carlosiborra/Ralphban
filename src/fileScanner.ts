@@ -1,16 +1,12 @@
 import * as vscode from "vscode";
-import type { Task, TaskFile } from "./types";
+import { minimatch } from "minimatch";
+import { validateTaskFile } from "./jsonParser";
+
+const outputChannel = vscode.window.createOutputChannel("Ralphban");
 
 function getFilePatterns(): string[] {
   const config = vscode.workspace.getConfiguration("ralphban");
-  return config.get<string[]>("filePatterns", [
-    "**/plans/**/*.json",
-    "**/prd/**/*.json",
-    "./*.json",
-    "**/*.prd.json",
-    "**/tasks.json",
-    "**/*.json",
-  ]);
+  return config.get<string[]>("filePatterns", ["**/*.prd.json", "**/prd.json", "**/tasks.json"]);
 }
 
 export async function findTaskFiles(): Promise<vscode.Uri[]> {
@@ -34,57 +30,30 @@ export async function findTaskFiles(): Promise<vscode.Uri[]> {
 
     for (const fileUri of uniqueUris) {
       try {
-        const content = await vscode.workspace.fs.readFile(fileUri);
-        const jsonString = new TextDecoder().decode(content);
-        const parsed = JSON.parse(jsonString);
-
-        if (isValidTaskFile(parsed)) {
+        if (await isValidTaskFile(fileUri)) {
           validUris.push(fileUri);
         }
-      } catch {
-        // Intentionally ignore errors for individual files
+      } catch (error) {
+        outputChannel.appendLine(`Error validating ${fileUri.fsPath}: ${error}`);
       }
     }
   } catch (error) {
-    console.error("Error scanning workspace for task files:", error);
+    outputChannel.appendLine(`Error scanning workspace for task files: ${error}`);
   }
 
   return validUris;
 }
 
-function isValidTaskFile(data: unknown): data is TaskFile {
-  if (!Array.isArray(data)) {
+export async function isValidTaskFile(uri: vscode.Uri): Promise<boolean> {
+  try {
+    const content = await vscode.workspace.fs.readFile(uri);
+    const jsonString = new TextDecoder().decode(content);
+    const parsed = JSON.parse(jsonString);
+    const result = await validateTaskFile(parsed);
+    return result.valid;
+  } catch {
     return false;
   }
-
-  return data.every((task): task is Task => {
-    if (!task || typeof task !== "object") {
-      return false;
-    }
-
-    const taskObj = task as Record<string, unknown>;
-
-    return (
-      typeof taskObj.description === "string" &&
-      (taskObj.status === undefined ||
-        (typeof taskObj.status === "string" &&
-          ["pending", "in_progress", "completed", "cancelled"].includes(taskObj.status))) &&
-      typeof taskObj.category === "string" &&
-      [
-        "frontend",
-        "backend",
-        "database",
-        "testing",
-        "documentation",
-        "infrastructure",
-        "security",
-        "functional",
-      ].includes(taskObj.category) &&
-      Array.isArray(taskObj.steps) &&
-      (taskObj.dependencies === undefined || Array.isArray(taskObj.dependencies)) &&
-      typeof taskObj.passes === "boolean"
-    );
-  });
 }
 
 export async function findTaskFileByName(
@@ -105,11 +74,5 @@ export function isTaskFileUri(uri: vscode.Uri): boolean {
   const patterns = getFilePatterns();
   const relativePath = vscode.workspace.asRelativePath(uri, false);
 
-  for (const pattern of patterns) {
-    if (relativePath.includes(pattern.replace("**/", "").replace("*", ""))) {
-      return true;
-    }
-  }
-
-  return false;
+  return patterns.some((pattern) => minimatch(relativePath, pattern, { dot: true }));
 }

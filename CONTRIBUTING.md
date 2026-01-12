@@ -108,17 +108,28 @@ export async function parse(u: any) {
 
 ```
 src/
-├── extension.ts        Entry point
-├── types.ts            Shared types
-├── messageHandler.ts   Extension-side logic
-├── file*.ts            File IO and discovery
+├── extension.ts          Entry point and activation
+├── types.ts              Shared TypeScript types
+├── messageHandler.ts     Message routing and extension-side logic
+├── fileScanner.ts        Workspace task file discovery
+├── jsonParser.ts         Schema validation with AJV
+├── fileWriter.ts         Atomic file writes
+├── kanbanPanel.ts        Panel management and view provider
+├── kanbanViewProvider.ts Webview construction and messaging
 ├── webview/
-│   ├── kanban.html
-│   ├── kanban.css
-│   └── kanban.js
+│   ├── kanban.html       Main HTML structure
+│   ├── kanban.css        All styling and animations
+│   ├── kanban.js         Webpack entry point
+│   ├── renderer.js       Board rendering logic
+│   ├── dom.js            DOM element exports
+│   ├── events.js         Event listener setup
+│   ├── state.js          State management
+│   ├── task-utils.js     Task utilities and filtering
+│   ├── form.js           Task form handling
+│   └── fileWatcher.ts    (not present in webview)
 ```
 
-Try to keep responsibilities obvious and separated.
+The webview is bundled as a single module. UI logic is split across focused files for maintainability.
 
 ### Naming
 
@@ -148,7 +159,7 @@ Before opening a PR, sanity check:
 
 - Dragging tasks between columns
 - Creating, editing, deleting tasks
-- Search and filters
+- Search and filters (including no-results state with Clear Filters button)
 - Markdown rendering
 - Editing JSON directly and seeing updates
 - Multiple boards in one workspace
@@ -238,43 +249,69 @@ Include:
 ```
 extension.ts
   Commands and activation
-  KanbanPanel and views
+
+kanbanPanel.ts
+  Panel lifecycle and view provider management
+
+kanbanViewProvider.ts
+  Webview HTML construction and message handling
 
 messageHandler.ts
-  Message routing and logic
+  Message routing, task operations, and file I/O
 
 fileScanner.ts
-  Workspace discovery
+  Workspace task file discovery
 
 jsonParser.ts
-  Schema validation
+  Schema validation with AJV
 
 fileWriter.ts
-  Atomic writes
+  Atomic file writes with backup
 ```
 
 ### Webview
 
+The webview is structured as a modular ESM codebase:
+
 ```
 kanban.html
-  Structure
+  Main HTML structure with modal and templates
 
 kanban.css
-  Styling and animations
+  All styling, including no-results state
 
 kanban.js
-  UI logic and messaging
+  Entry point that imports all modules
+
+renderer.js
+  Board and column rendering, task card creation
+
+dom.js
+  DOM element references and exports
+
+events.js
+  Search, filter, and button event listeners
+
+state.js
+  Central state management and filter state
+
+task-utils.js
+  Task filtering, status utilities, and validations
+
+form.js
+  Task form modal handling and validation
 ```
 
 ### Message flow
 
 ```
-Webview
-  → postMessage
-  → Extension host
-  → File update
-  → postMessage back
-  → UI rerender
+Webview (renderer.js)
+  → postMessage (action, data)
+  → Extension host (messageHandler.ts)
+  → File update (fileWriter.ts)
+  → File watcher notification
+  → postMessage back (updated tasks)
+  → Webview rerender
 ```
 
 No hidden state. The file is the source of truth.
@@ -290,6 +327,98 @@ If something is unclear, open a discussion. That is better than guessing.
 ## Good First Issues
 
 Look for issues tagged `good-first-issue`. Documentation, UI polish, and error handling are great starting points.
+
+## Development
+
+### Prerequisites
+
+- Node.js 18+
+- pnpm
+- VS Code 1.108+
+
+### Quick Start
+
+1. **Installation**:
+
+   ```bash
+   git clone https://github.com/carlosiborra/ralphban.git
+   cd ralphban
+   pnpm install
+   pnpm run compile
+   ```
+
+2. **Run Extension**:
+   - Open the project in VS Code: `code .`
+   - Press `F5` (starts Extension Development Host).
+   - In the new window, create a file named `test.prd.json` with some tasks.
+   - Click the **Ralphban** icon in the sidebar to see your board!
+
+### Building & Packaging
+
+To compile TypeScript and create a `.vsix` package for distribution:
+
+```bash
+# Compile TypeScript
+pnpm run compile
+
+# Package the extension
+pnpm exec vsce package --no-dependencies
+```
+
+The resulting `ralphban-X.X.X.vsix` file can be installed in VS Code via:
+
+- **Extensions**: `...` menu → "Install from VSIX"
+- **Command Palette**: "Extensions: Install from VSIX"
+
+> **Note**: This is a pnpm project. Use `pnpm install` instead of `npm install`.
+
+### Architecture at a Glance
+
+```
+Extension Host (Backend)          Webview (Frontend)
+┌─────────────────────┐          ┌─────────────────┐
+│ extension.ts        │          │ kanban.html     │
+│   ├─ Commands       │          │ kanban.css      │
+│   └─ Event handlers │◄────────►│ kanban.js       │
+│                     │          │                 │
+│ messageHandler.ts   │  Message │ dom.js          │ DOM element refs
+│   ├─ CRUD ops       │  Passing │ state.js        │ State management
+│   └─ File I/O       │◄────────►│ task-utils.js   │ Task utilities
+│                     │          │ renderer.js     │ Rendering
+│ fileScanner.ts      │          │ form.js         │ Forms
+│ jsonParser.ts       │          │ events.js       │ Event listeners
+│ fileWriter.ts       │          └─────────────────┘
+│ fileWatcher.ts      │
+└─────────────────────┘
+         │
+         ▼
+   ┌──────────────┐
+   │ prd.json     │
+   │ tasks.json   │
+   └──────────────┘
+```
+
+### Key Files
+
+| File                        | Purpose                                   |
+| :-------------------------- | :---------------------------------------- |
+| `src/extension.ts`          | Entry point, command registration         |
+| `src/types.ts`              | TypeScript interfaces and data structures |
+| `src/messageHandler.ts`     | Business logic and CRUD operations        |
+| `src/webview/`              | Frontend UI modules                       |
+| `src/webview/dom.js`        | DOM element references and exports        |
+| `src/webview/state.js`      | State management (tasks, filters)         |
+| `src/webview/task-utils.js` | Task utilities and filtering              |
+| `src/webview/renderer.js`   | Board rendering and task cards            |
+| `src/webview/form.js`       | Task form handling and submission         |
+| `src/webview/events.js`     | Event listeners and message handling      |
+| `schemas/task-schema.json`  | JSON Schema for task validation           |
+
+### Troubleshooting
+
+- **Extension doesn't activate**: Check the "Ralphban" channel in the Output view (`View → Output`).
+- **Webview is blank**: Open "Developer: Open Webview Developer Tools" from the Command Palette (`Cmd+Shift+P`) to check for frontend errors.
+- **Build issues**: Ensure you've run `pnpm install` and `pnpm run compile`.
 
 ## Code of Conduct
 

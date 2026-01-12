@@ -10,21 +10,11 @@
   "definitions": {
     "task": {
       "type": "object",
-      "required": ["category", "description", "steps", "passes"],
+      "required": ["category", "description", "steps"],
       "properties": {
         "category": {
           "type": "string",
-          "description": "The category of the task",
-          "enum": [
-            "frontend",
-            "backend",
-            "database",
-            "testing",
-            "documentation",
-            "infrastructure",
-            "security",
-            "functional"
-          ]
+          "description": "The category of the task"
         },
         "description": {
           "type": "string",
@@ -52,14 +42,8 @@
           "enum": ["pending", "in_progress", "completed", "cancelled"]
         },
         "passes": {
-          "type": "boolean",
+          "type": ["boolean", "null"],
           "description": "Whether the task passes its criteria"
-        },
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the task",
-          "pattern": ".+",
-          "minLength": 1
         },
         "priority": {
           "type": "string",

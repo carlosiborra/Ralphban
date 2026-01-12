@@ -1,6 +1,16 @@
 import Ajv, { type ValidateFunction } from "ajv";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import * as vscode from "vscode";
 import type { TaskFile } from "./types";
+
+interface HasTasksProperty {
+  tasks: unknown;
+}
+
+function hasTasksProperty(obj: unknown): obj is HasTasksProperty {
+  return typeof obj === "object" && obj !== null && "tasks" in obj;
+}
 
 let schemaValidator: ValidateFunction | null = null;
 let schemaLoadPromise: Promise<ValidateFunction> | null = null;
@@ -15,16 +25,20 @@ async function loadSchemaValidator(): Promise<ValidateFunction> {
   }
 
   schemaLoadPromise = (async () => {
-    const extensionUri = vscode.extensions.getExtension(
-      "ralphban-publisher.ralphban"
-    )?.extensionUri;
-    if (!extensionUri) {
-      throw new Error("Extension URI not found");
+    let schemaContent: string;
+
+    const extension = vscode.extensions.getExtension("carlosiborra.ralphban");
+    if (extension) {
+      const schemaUri = extension.extensionUri.with({
+        path: `${extension.extensionUri.path}/schemas/task-schema.json`,
+      });
+      const uint8Array = await vscode.workspace.fs.readFile(schemaUri);
+      schemaContent = Buffer.from(uint8Array).toString("utf8");
+    } else {
+      const schemaPath = path.join(__dirname, "..", "schemas", "task-schema.json");
+      schemaContent = fs.readFileSync(schemaPath, "utf8");
     }
 
-    const schemaUri = extensionUri.with({ path: `${extensionUri.path}/schemas/task-schema.json` });
-    const uint8Array = await vscode.workspace.fs.readFile(schemaUri);
-    const schemaContent = Buffer.from(uint8Array).toString("utf8");
     const schema = JSON.parse(schemaContent);
 
     const ajv = new Ajv({ allErrors: true });
@@ -61,7 +75,14 @@ export async function parseTaskFile(uri: vscode.Uri): Promise<TaskFile> {
     }
 
     const validator = await loadSchemaValidator();
-    const isValid = validator(jsonData);
+
+    // Support files where the tasks are wrapped in a 'tasks' property
+    let validationData = jsonData;
+    if (hasTasksProperty(jsonData)) {
+      validationData = jsonData.tasks;
+    }
+
+    const isValid = validator(validationData);
 
     if (!isValid) {
       const errorMessages = validator.errors?.map((err) => {
@@ -73,7 +94,7 @@ export async function parseTaskFile(uri: vscode.Uri): Promise<TaskFile> {
       throw new ParseError(`JSON validation failed for file: ${uri.fsPath}`, errorMessages);
     }
 
-    const taskFile = jsonData as TaskFile;
+    const taskFile = validationData as TaskFile;
     return taskFile;
   } catch (error) {
     if (error instanceof ParseError) {
@@ -91,7 +112,14 @@ export async function validateTaskFile(
 ): Promise<{ valid: boolean; errors?: string[] }> {
   try {
     const validator = await loadSchemaValidator();
-    const isValid = validator(jsonData);
+
+    // Support files where the tasks are wrapped in a 'tasks' property
+    let validationData = jsonData;
+    if (hasTasksProperty(jsonData)) {
+      validationData = jsonData.tasks;
+    }
+
+    const isValid = validator(validationData);
 
     if (!isValid) {
       const errorMessages = validator.errors?.map((err) => {

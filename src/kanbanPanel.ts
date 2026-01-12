@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { TaskFileWatcher } from "./fileWatcher";
 import { ParseError, parseTaskFile } from "./jsonParser";
 import { handleWebviewMessage } from "./messageHandler";
+import { injectWebviewAssets } from "./utils/webview";
 
 export class KanbanPanel {
   public static readonly viewType = "ralphban.kanbanPanel";
@@ -49,6 +50,12 @@ export class KanbanPanel {
     KanbanPanel.currentPanel = undefined;
     this._watcher?.dispose();
     this.panel.dispose();
+  }
+
+  public static closeCurrentPanel(): void {
+    if (KanbanPanel.currentPanel) {
+      KanbanPanel.currentPanel.dispose();
+    }
   }
 
   public static async createOrShow(extensionUri: vscode.Uri, taskFileUri?: vscode.Uri) {
@@ -108,9 +115,21 @@ export class KanbanPanel {
 
     try {
       const taskFile = await parseTaskFile(this._currentFile);
+      const config = vscode.workspace.getConfiguration("ralphban");
+      const categories = config.get<string[]>("categories") || [
+        "frontend",
+        "backend",
+        "database",
+        "testing",
+        "documentation",
+        "infrastructure",
+        "security",
+        "functional",
+      ];
       await this.panel.webview.postMessage({
         type: "update",
         data: taskFile,
+        categories,
       });
     } catch (error) {
       if (error instanceof ParseError) {
@@ -134,44 +153,18 @@ export class KanbanPanel {
 
   private getHtmlForWebview(webview: vscode.Webview) {
     const scriptPath = vscode.Uri.file(
-      path.join(this.extensionUri.fsPath, "src", "webview", "kanban.js")
+      path.join(this.extensionUri.fsPath, "out", "webview", "kanban.js")
     );
     const stylePath = vscode.Uri.file(
-      path.join(this.extensionUri.fsPath, "src", "webview", "kanban.css")
+      path.join(this.extensionUri.fsPath, "out", "webview", "kanban.css")
     );
-    const htmlPath = path.join(this.extensionUri.fsPath, "src", "webview", "kanban.html");
+    const htmlPath = path.join(this.extensionUri.fsPath, "out", "webview", "kanban.html");
 
     const scriptUri = webview.asWebviewUri(scriptPath);
     const styleUri = webview.asWebviewUri(stylePath);
 
-    let html = fs.readFileSync(htmlPath, "utf8");
+    const html = fs.readFileSync(htmlPath, "utf8");
 
-    const nonce = getNonce();
-
-    html = html.replace(/\${webview.cspSource}/g, webview.cspSource);
-    html = html.replace(/\${nonce}/g, nonce);
-    html = html.replace(/\${styleUri}/g, styleUri.toString());
-    html = html.replace(/\${scriptUri}/g, scriptUri.toString());
-
-    if (!html.includes(styleUri.toString())) {
-      html = html.replace("</head>", `    <link href="${styleUri}" rel="stylesheet">\n</head>`);
-    }
-    if (!html.includes(scriptUri.toString())) {
-      html = html.replace(
-        "</body>",
-        `    <script nonce="${nonce}" src="${scriptUri}"></script>\n</body>`
-      );
-    }
-
-    return html;
+    return injectWebviewAssets(html, webview, [styleUri], scriptUri);
   }
-}
-
-function getNonce() {
-  let text = "";
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
 }

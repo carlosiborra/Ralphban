@@ -1,0 +1,34 @@
+[
+  {
+    "description": "Set up project structure",
+    "status": "completed",
+    "category": "infrastructure",
+    "steps": ["Create project directory", "Initialize package.json", "Configure TypeScript"],
+    "dependencies": [],
+    "passes": true
+  },
+  {
+    "description": "Create Kanban webview UI",
+    "status": "in_progress",
+    "category": "frontend",
+    "steps": ["Design kanban layout", "Implement drag and drop", "Add task cards"],
+    "dependencies": ["Set up project structure"],
+    "passes": null
+  },
+  {
+    "description": "Write unit tests",
+    "status": "in_progress",
+    "category": "testing",
+    "steps": ["Set up test framework", "Write component tests", "Run coverage report"],
+    "dependencies": ["Create Kanban webview UI"],
+    "passes": null
+  },
+  {
+    "description": "Document API endpoints",
+    "status": "pending",
+    "category": "documentation",
+    "steps": ["Review existing code", "Write API documentation", "Add code comments"],
+    "dependencies": [],
+    "passes": null
+  }
+]

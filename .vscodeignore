@@ -22,6 +22,8 @@ tests/**
 **/*.test.*
 **/*.spec.*
 coverage/**
+test-prds/**
+test-workspace/**
 
 # Build outputs / temp
 *.vsix
@@ -48,7 +50,13 @@ desktop.ini
 
 # Common assets people ship
 !README.md
-!LICENSE
+!LICENSE.txt
 !CHANGELOG.md
 !images/**
 !schemas/**
+
+# Unnecessary metadata
+--version/**
+.husky/**
+.prettierignore
+*.gif

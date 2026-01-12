@@ -3,6 +3,7 @@ import * as path from "node:path";
 import * as vscode from "vscode";
 import { findTaskFiles } from "./fileScanner";
 import type { TaskFileWatcher } from "./fileWatcher";
+import { injectWebviewAssets } from "./utils/webview";
 
 export class KanbanViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "kanbanBoard";
@@ -87,23 +88,13 @@ export class KanbanViewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
-    const htmlPath = path.join(this._extensionUri.fsPath, "src", "webview", "selector.html");
-    let html = fs.readFileSync(htmlPath, "utf8");
+    const stylePath = vscode.Uri.file(
+      path.join(this._extensionUri.fsPath, "out", "webview", "kanban.css")
+    );
+    const styleUri = webview.asWebviewUri(stylePath);
+    const htmlPath = path.join(this._extensionUri.fsPath, "out", "webview", "selector.html");
+    const html = fs.readFileSync(htmlPath, "utf8");
 
-    const nonce = getNonce();
-
-    html = html.replace(/\${webview.cspSource}/g, webview.cspSource);
-    html = html.replace(/\${nonce}/g, nonce);
-
-    return html;
+    return injectWebviewAssets(html, webview, [styleUri]);
   }
-}
-
-function getNonce() {
-  let text = "";
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
 }
