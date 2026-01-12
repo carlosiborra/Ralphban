@@ -4,6 +4,23 @@ This file documents notable changes to Ralphban.
 
 The format loosely follows Keep a Changelog and versioning follows Semantic Versioning. Entries focus on what actually matters to users and contributors.
 
+## [1.0.1] - 2026.01.12
+
+### Fixed
+
+- Minor fixes related to changing task descriptions in the UI
+
+### Added
+
+- Demo animation gif in README for visual introduction to Ralphban workflow
+- Usage note explaining integration with OpenCode and PRD Generator subagent
+
+### Changed
+
+- Updated .vscodeignore to exclude \*.gif files from extension packaging
+
+---
+
 ## [1.0.0] - 2026.01.11
 
 ### Added

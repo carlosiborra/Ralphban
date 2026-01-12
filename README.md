@@ -8,9 +8,13 @@ But in practice, staring at raw JSON while iterating on long-running agents and 
 
 So I built Ralphban.
 
+![Ralphban Demo](demo-final.gif)
+
 Ralphban is a VS Code extension that turns Ralph-style task files into a visual Kanban board. It is not a project manager. It is not Jira. It is a debugging and thinking tool for people building LLM-driven systems.
 
 If you are building LLM workflows, task harnesses, or agent loops, this is meant to live next to your code.
+
+Note: I personally use Ralphban alongside [OpenCode](https://opencode.ai/) and a specialized PRD Generator subagent that uses Ralphban's JSON schema. This combined with a bash script that iteratively ingests tasks into agents (as demonstrated in Matt Pocock's video), creates a powerful loop: describe features, generate structured tasks, visualize progress, and iterate until complete.
 
 ## What Ralphban Is For
 
@@ -147,98 +151,6 @@ A list hides flow. A board shows it.
 
 When something stalls, loops, or fails, you see it immediately.
 
-## Development
-
-### Prerequisites
-
-- Node.js 18+
-- pnpm
-- VS Code 1.108+
-
-### Quick Start
-
-1. **Installation**:
-
-   ```bash
-   git clone https://github.com/carlosiborra/ralphban.git
-   cd ralphban
-   pnpm install
-   pnpm run compile
-   ```
-
-2. **Run Extension**:
-   - Open the project in VS Code: `code .`
-   - Press `F5` (starts Extension Development Host).
-   - In the new window, create a file named `test.prd.json` with some tasks.
-   - Click the **Ralphban** icon in the sidebar to see your board!
-
-### Building & Packaging
-
-To compile TypeScript and create a `.vsix` package for distribution:
-
-```bash
-# Compile TypeScript
-pnpm run compile
-
-# Package the extension
-pnpm exec vsce package --no-dependencies
-```
-
-The resulting `ralphban-X.X.X.vsix` file can be installed in VS Code via:
-
-- **Extensions**: `...` menu → "Install from VSIX"
-- **Command Palette**: "Extensions: Install from VSIX"
-
-> **Note**: This is a pnpm project. Use `pnpm install` instead of `npm install`.\
-
-### Architecture at a Glance
-
-```
-Extension Host (Backend)          Webview (Frontend)
-┌─────────────────────┐          ┌─────────────────┐
-│ extension.ts        │          │ kanban.html     │
-│   ├─ Commands       │          │ kanban.css      │
-│   └─ Event handlers │◄────────►│ kanban.js       │
-│                     │          │                 │
-│ messageHandler.ts   │  Message │ dom.js          │ DOM element refs
-│   ├─ CRUD ops       │  Passing │ state.js        │ State management
-│   └─ File I/O       │◄────────►│ task-utils.js   │ Task utilities
-│                     │          │ renderer.js     │ Rendering
-│ fileScanner.ts      │          │ form.js         │ Forms
-│ jsonParser.ts       │          │ events.js       │ Event listeners
-│ fileWriter.ts       │          └─────────────────┘
-│ fileWatcher.ts      │
-└─────────────────────┘
-         │
-         ▼
-  ┌──────────────┐
-  │ prd.json     │
-  │ tasks.json   │
-  └──────────────┘
-```
-
-### Key Files
-
-| File                        | Purpose                                   |
-| :-------------------------- | :---------------------------------------- |
-| `src/extension.ts`          | Entry point, command registration         |
-| `src/types.ts`              | TypeScript interfaces and data structures |
-| `src/messageHandler.ts`     | Business logic and CRUD operations        |
-| `src/webview/`              | Frontend UI modules                       |
-| `src/webview/dom.js`        | DOM element references and exports        |
-| `src/webview/state.js`      | State management (tasks, filters)         |
-| `src/webview/task-utils.js` | Task utilities and filtering              |
-| `src/webview/renderer.js`   | Board rendering and task cards            |
-| `src/webview/form.js`       | Task form handling and submission         |
-| `src/webview/events.js`     | Event listeners and message handling      |
-| `schemas/task-schema.json`  | JSON Schema for task validation           |
-
-### Troubleshooting
-
-- **Extension doesn't activate**: Check the "Ralphban" channel in the Output view (`View → Output`).
-- **Webview is blank**: Open "Developer: Open Webview Developer Tools" from the Command Palette (`Cmd+Shift+P`) to check for frontend errors.
-- **Build issues**: Ensure you've run `pnpm install` and `pnpm run compile`.
-
 ## Documentation Index
 
 1. **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute to Ralphban
@@ -256,13 +168,12 @@ Just files, tasks, and visibility.
 
 ## License
 
-MIT. Do whatever you want with it.
+MIT
 
 ## Acknowledgments
 
-- The Ralph task decomposition approach
+- The Ralph task decomposition approach by Matt Pocock
 - Anthropic’s work on agent harnesses
-- VS Code extension tooling
 
 ---
 
