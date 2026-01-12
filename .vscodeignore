@@ -52,11 +52,13 @@ desktop.ini
 !README.md
 !LICENSE.txt
 !CHANGELOG.md
-!images/**
+!images/*.png
 !schemas/**
 
 # Unnecessary metadata
 --version/**
 .husky/**
 .prettierignore
-*.gif
+
+# Exclude specific images
+images/*.gif
