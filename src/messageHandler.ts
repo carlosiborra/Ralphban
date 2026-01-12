@@ -21,12 +21,17 @@ interface CreateTask extends BaseMessage {
 
 interface UpdateTask extends BaseMessage {
   type: "updateTask";
-  task: Task;
+  task: Task & { originalDescription?: string };
 }
 
 interface DeleteTask extends BaseMessage {
   type: "deleteTask";
   taskId: string;
+}
+
+interface TaskUpdated extends BaseMessage {
+  type: "taskUpdated";
+  task: Task & { originalDescription?: string };
 }
 
 interface RefreshTasks extends BaseMessage {
@@ -48,6 +53,7 @@ export type WebviewMessage =
   | CreateTask
   | UpdateTask
   | DeleteTask
+  | TaskUpdated
   | RefreshTasks
   | InfoMessage
   | ErrorMessage;
@@ -76,7 +82,10 @@ export async function handleWebviewMessage(
       case "updateTask":
         await updateTask(taskFileUri, message.task);
         if (webviewHost) {
-          await refreshWebview(taskFileUri, webviewHost);
+          webviewHost.webview.postMessage({
+            type: "taskUpdated",
+            task: message.task,
+          });
         }
         break;
 
@@ -136,18 +145,23 @@ async function createTask(uri: vscode.Uri, task: Task): Promise<void> {
   await writeTaskFile(uri, tasks);
 }
 
-async function updateTask(uri: vscode.Uri, updatedTask: Task): Promise<void> {
+async function updateTask(
+  uri: vscode.Uri,
+  updatedTask: Task & { originalDescription?: string }
+): Promise<void> {
   const tasks = await parseTaskFile(uri);
+
   const taskDescription = updatedTask.description;
+  const originalDescription = updatedTask.originalDescription || taskDescription;
 
   if (!taskDescription) {
     throw new Error("Task must have a description");
   }
 
-  const taskIndex = tasks.findIndex((t) => t.description === taskDescription);
+  const taskIndex = tasks.findIndex((t) => t.description === originalDescription);
 
   if (taskIndex === -1) {
-    throw new Error(`Task "${taskDescription}" not found`);
+    throw new Error(`Task "${originalDescription}" not found`);
   }
 
   tasks[taskIndex] = updatedTask;

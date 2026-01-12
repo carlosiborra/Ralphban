@@ -158,8 +158,9 @@ export function handleFormSubmit() {
     if (!validateForm()) return;
 
     const newStatus = taskStatus.value || (taskPasses.checked ? "completed" : "pending");
+    const newDescription = taskDescription.value.trim();
     const task = {
-      description: taskDescription.value.trim(),
+      description: newDescription,
       category: taskCategory.value,
       priority: taskPriority.value,
       status: newStatus,
@@ -170,7 +171,7 @@ export function handleFormSubmit() {
 
     const editingTaskDescription = getEditingTaskId();
     if (editingTaskDescription) {
-      task.description = editingTaskDescription;
+      task.originalDescription = editingTaskDescription;
       vscode.postMessage({ type: "updateTask", task });
     } else {
       vscode.postMessage({ type: "createTask", task });

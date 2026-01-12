@@ -55,3 +55,10 @@ export function updateFilter(key, value) {
 export function clearFilters() {
   filters = { search: "", category: "", priority: "" };
 }
+
+export function updateTaskByDescription(originalDescription, updatedTask) {
+  const index = currentTasks.findIndex((t) => t.description === originalDescription);
+  if (index !== -1) {
+    currentTasks[index] = updatedTask;
+  }
+}

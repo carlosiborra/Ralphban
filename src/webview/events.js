@@ -6,7 +6,13 @@ import {
   closeButton,
   modal,
 } from "./dom.js";
-import { setFilters, updateFilter, getCurrentTasks, setCategories } from "./state.js";
+import {
+  setFilters,
+  updateFilter,
+  getCurrentTasks,
+  setCategories,
+  updateTaskByDescription,
+} from "./state.js";
 import { applyFilters } from "./task-utils.js";
 import { hideModal } from "./form.js";
 import { renderBoard } from "./renderer.js";
@@ -63,11 +69,22 @@ export function setupMessageListener() {
   window.addEventListener("message", (event) => {
     const message = event.data;
     switch (message.type) {
+      case "taskUpdated":
+        if (message.task && message.task.originalDescription) {
+          updateTaskByDescription(message.task.originalDescription, message.task);
+        }
+        renderBoard(getCurrentTasks(), openTaskForm);
+        break;
       case "update":
         if (message.categories) {
           setCategories(message.categories);
         }
-        renderBoard(message.data, openTaskForm);
+        if (message.data.task && message.data.originalDescription) {
+          updateTaskByDescription(message.data.originalDescription, message.data.task);
+          renderBoard(getCurrentTasks(), openTaskForm);
+        } else {
+          renderBoard(message.data, openTaskForm);
+        }
         break;
     }
   });
