@@ -48,7 +48,7 @@ export function openTaskForm(task = null, statusDefault = null) {
     formDeleteTaskBtn.style.display = "flex";
     taskCategory.value = task.category;
     taskPriority.value = task.priority || "none";
-    taskPasses.checked = task.passes === true;
+    taskPasses.checked = task.passes === true || task.status === "completed";
     taskStatus.value = task.status || "";
     taskDescription.value = task.description;
     stepsContainer.innerHTML = "";
@@ -157,14 +157,15 @@ export function handleFormSubmit() {
     e.preventDefault();
     if (!validateForm()) return;
 
+    const newStatus = taskStatus.value || (taskPasses.checked ? "completed" : "pending");
     const task = {
       description: taskDescription.value.trim(),
       category: taskCategory.value,
       priority: taskPriority.value,
-      status: taskStatus.value || (taskPasses.checked ? "completed" : "pending"),
+      status: newStatus,
       steps: getStepsFromForm(),
       dependencies: getDependenciesFromForm(),
-      passes: taskPasses.checked,
+      passes: newStatus === "completed" ? true : undefined,
     };
 
     const editingTaskDescription = getEditingTaskId();
@@ -183,6 +184,10 @@ export function setupFormEventListeners() {
   cancelEditBtn.onclick = () => {
     hideModal();
   };
+
+  taskStatus.addEventListener("change", () => {
+    taskPasses.checked = taskStatus.value === "completed";
+  });
 
   addStepBtn.onclick = () => {
     addStepInput();

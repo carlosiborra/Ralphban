@@ -6,9 +6,9 @@ import { KanbanPanel } from "./kanbanPanel";
 import { KanbanViewProvider } from "./kanbanViewProvider";
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log("Ralphban extension is now active!");
   const output = vscode.window.createOutputChannel("Ralphban");
   context.subscriptions.push(output);
+  output.appendLine("Ralphban extension is now active!");
 
   const provider = new KanbanViewProvider(context.extensionUri);
   context.subscriptions.push(
@@ -154,5 +154,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
-  console.log("Ralphban extension is now deactivated!");
+  vscode.window
+    .createOutputChannel("Ralphban")
+    .appendLine("Ralphban extension is now deactivated!");
 }

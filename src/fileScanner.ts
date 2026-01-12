@@ -2,6 +2,8 @@ import * as vscode from "vscode";
 import { minimatch } from "minimatch";
 import { validateTaskFile } from "./jsonParser";
 
+const outputChannel = vscode.window.createOutputChannel("Ralphban");
+
 function getFilePatterns(): string[] {
   const config = vscode.workspace.getConfiguration("ralphban");
   return config.get<string[]>("filePatterns", ["**/*.prd.json", "**/prd.json", "**/tasks.json"]);
@@ -31,12 +33,12 @@ export async function findTaskFiles(): Promise<vscode.Uri[]> {
         if (await isValidTaskFile(fileUri)) {
           validUris.push(fileUri);
         }
-      } catch {
-        // Intentionally ignore errors for individual files
+      } catch (error) {
+        outputChannel.appendLine(`Error validating ${fileUri.fsPath}: ${error}`);
       }
     }
   } catch (error) {
-    console.error("Error scanning workspace for task files:", error);
+    outputChannel.appendLine(`Error scanning workspace for task files: ${error}`);
   }
 
   return validUris;
