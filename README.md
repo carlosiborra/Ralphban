@@ -8,7 +8,7 @@ But in practice, staring at raw JSON while iterating on long-running agents and 
 
 So I built Ralphban.
 
-![Ralphban Demo](demo-final.gif)
+![Ralphban Demo](images/demo-final.gif)
 
 Ralphban is a VS Code extension that turns Ralph-style task files into a visual Kanban board. It is not a project manager. It is not Jira. It is a debugging and thinking tool for people building LLM-driven systems.
 
