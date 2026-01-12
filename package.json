@@ -1,7 +1,7 @@
 {
   "name": "ralphban",
   "displayName": "Ralphban - Ralph's Kanban Board",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "icon": "images/icon_128_128.png",
   "description": "An extension for visualizing tasks in a Kanban for LLM agents running in Ralph Wiggum mode",
   "main": "./out/extension.js",
